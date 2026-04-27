@@ -1,0 +1,7 @@
+# Accumulator files touched by parallel ingest or edit sessions.
+#
+# This file receives repeated additions:
+#   - wiki/log.md : chronological activity entries
+#
+# `merge=union` keeps concurrent additions during multi-agent work.
+wiki/log.md             merge=union

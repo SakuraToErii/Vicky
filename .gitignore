@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment
+.env
+*.env.local
+
+# Language state (set by setup.sh --lang)
+.codex/.current-lang
+
+# Codex local settings (contains MCP server permissions, may contain API keys)
+.codex/settings.local.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Obsidian local state
+.obsidian/*
+!.obsidian/templates.json
+
+# Virtual environment
+.venv/
+
+# Raw data (large files managed separately)
+raw/papers/*.pdf
