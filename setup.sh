@@ -39,11 +39,10 @@ else
     exit 1
 fi
 
-if command -v codex >/dev/null 2>&1; then
-    ok "Codex installed"
-else
-    warn "Codex not found. Install the Codex CLI, then rerun setup."
-fi
+echo ""
+info "Checking required CLIs..."
+"$PYTHON_CMD" .codex/lib/vicky/preflight.py commands codex obsidian rg
+ok "Required CLIs available"
 
 echo ""
 info "Preparing .venv..."
@@ -66,6 +65,11 @@ info "Installing dependencies..."
 "$VENV_PYTHON" -m pip install --upgrade pip >/dev/null
 "$VENV_PYTHON" -m pip install "requests>=2.28.0" "PyYAML>=6.0" >/dev/null
 ok "Dependencies installed"
+
+echo ""
+info "Verifying Python packages..."
+"$VENV_PYTHON_ABS" .codex/lib/vicky/preflight.py modules requests yaml
+ok "Python packages available"
 
 echo ""
 info "Writing config files..."

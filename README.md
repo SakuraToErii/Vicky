@@ -60,6 +60,8 @@ Requirements:
 - Codex CLI
 - Obsidian CLI (`obsidian`) and ripgrep (`rg`) for vault diagnostics and filtered graph checks
 
+`setup.sh` checks these CLIs before creating or reusing `.venv`, then verifies the required Python packages inside the environment.
+
 Bootstrap:
 
 ```bash
@@ -67,7 +69,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-The script creates `.venv`, installs dependencies, writes `.env` from `.config/.env.example`, and writes `.codex/settings.local.json` from the template.
+The script checks required CLIs, creates `.venv`, installs dependencies, verifies Python packages, writes `.env` from `.config/.env.example`, and writes `.codex/settings.local.json` from the template.
 
 `SEMANTIC_SCHOLAR_API_KEY` is optional and useful for source metadata enrichment.
 

@@ -139,10 +139,6 @@ def check_support_files(wiki_dir: Path) -> list[LintIssue]:
     return issues
 
 
-def _normalized_nonempty_lines(content: str) -> list[str]:
-    return [line.rstrip() for line in content.splitlines() if line.strip()]
-
-
 def _contains_canonical_template(content: str, template: str) -> bool:
     try:
         expected = yaml.safe_load(template)
@@ -250,14 +246,6 @@ def check_field_values(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIssue
     return issues
 
 
-def _extract_inline_list(content: str, field: str) -> list[str]:
-    match = re.search(rf"{re.escape(field)}:\s*\[(.*?)\]", content, re.DOTALL)
-    if not match:
-        return []
-    inner = match.group(1)
-    return [item.strip().strip('"').strip("'") for item in inner.split(",") if item.strip()]
-
-
 def _as_list(value) -> list:
     if value in ("", None):
         return []
@@ -351,12 +339,15 @@ def check_cross_references(wiki_dir: Path, pages: dict[str, Path]) -> list[LintI
     for slug, file_path in pages.items():
         page_type = file_path.parent.name
         content = file_path.read_text(encoding="utf-8")
+        frontmatter = extract_frontmatter(content)
         rel_path = str(file_path.relative_to(wiki_dir))
         if page_type not in {"concepts", "theorems", "people"}:
             continue
 
         field_name = "key_sources"
-        for source_slug in _extract_inline_list(content, field_name):
+        for source_slug in (_normalize_link_target(value) for value in _as_list(frontmatter.get(field_name))):
+            if not source_slug:
+                continue
             source_path = wiki_dir / "sources" / f"{source_slug}.md"
             if not source_path.exists():
                 issues.append(LintIssue("🟡", "xref", rel_path, f"{field_name} has {source_slug} but sources/{source_slug}.md is missing"))

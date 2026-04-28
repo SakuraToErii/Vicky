@@ -234,6 +234,30 @@ class TestCrossReferences:
         assert "[[flash-attention]]" in content
         assert fixes
 
+    def test_block_list_key_sources_are_checked(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+            "## Summary\n\nSome text",
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "flash-attention",
+            [
+                'title: "Flash Attention"',
+                "slug: flash-attention",
+                "tags: [attention]",
+                "maturity: working",
+                "key_sources:",
+                "  - paper-a",
+            ],
+        )
+        issues = lint_mod.check_cross_references(wiki_dir, lint_mod.find_all_pages(wiki_dir))
+        assert any("does not link back" in issue.message for issue in issues)
+
 
 class TestRelationConsistency:
     def test_relation_property_requires_body_explanation(self, wiki_dir):

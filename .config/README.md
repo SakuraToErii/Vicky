@@ -2,6 +2,8 @@
 
 ## Files
 
+`setup.sh` performs the dependency preflight first, then writes these files.
+
 ### `.config/.env.example`
 
 Copy it to the project root:
