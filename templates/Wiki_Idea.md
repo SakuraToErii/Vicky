@@ -12,14 +12,6 @@ relation_uses: []
 relation_compares_with: []
 ---
 
-## Prompt
-
-## Why It Matters
-
-## Supporting Sources
-
-## Open Questions
+## Notes
 
 ## Relations
-
-## Next Step

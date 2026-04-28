@@ -10,12 +10,4 @@ date_added: "{{date:YYYY-MM-DD}}"
 
 ## Summary
 
-## Key Points
-
-## Evidence / Results
-
-## Definitions and Theorems
-
 ## Related
-
-## My Notes

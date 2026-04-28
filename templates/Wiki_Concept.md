@@ -13,16 +13,6 @@ relation_uses: []
 relation_compares_with: []
 ---
 
-## Definition
-
-## Intuition
-
-## Variants
-
-## Connections
+## Notes
 
 ## Relations
-
-## Open Questions
-
-## Related

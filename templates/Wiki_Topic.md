@@ -10,16 +10,6 @@ relation_uses: []
 relation_compares_with: []
 ---
 
-## Overview
-
-## Core Concepts
-
-## Key Sources
-
-## Important Theorems
-
-## Key People
+## Notes
 
 ## Relations
-
-## Open Questions

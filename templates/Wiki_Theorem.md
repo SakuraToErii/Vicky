@@ -16,14 +16,4 @@ relation_compares_with: []
 
 ## Statement
 
-## Conditions
-
-## Proof Sketch
-
-## Consequences
-
-## Examples
-
 ## Relations
-
-## Related

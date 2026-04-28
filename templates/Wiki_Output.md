@@ -10,12 +10,6 @@ relation_uses: []
 relation_compares_with: []
 ---
 
-## Question
-
 ## Answer
 
 ## Relations
-
-## Sources Used
-
-## Follow-up

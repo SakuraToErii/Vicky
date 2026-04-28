@@ -31,6 +31,16 @@ EXPECTED_TEMPLATE_FIELD_ORDER = {
     "Wiki_Theorem.md": ["title", "slug", "tags", "aliases", "theorem_kind", "status", "key_sources", *RELATION_FIELDS],
     "Wiki_Topic.md": ["title", "slug", "tags", *RELATION_FIELDS],
 }
+EXPECTED_TEMPLATE_HEADINGS = {
+    "Wiki_Concept.md": ["## Notes", "## Relations"],
+    "Wiki_Foundation.md": ["## Notes", "## Relations"],
+    "Wiki_Idea.md": ["## Notes", "## Relations"],
+    "Wiki_Output.md": ["## Answer", "## Relations"],
+    "Wiki_Person.md": ["## Notes", "## Relations"],
+    "Wiki_Source.md": ["## Summary", "## Related"],
+    "Wiki_Theorem.md": ["## Statement", "## Relations"],
+    "Wiki_Topic.md": ["## Notes", "## Relations"],
+}
 
 
 def _frontmatter(path: Path) -> dict:
@@ -40,6 +50,13 @@ def _frontmatter(path: Path) -> dict:
     parsed = yaml.safe_load(match.group(1))
     assert isinstance(parsed, dict)
     return parsed
+
+
+def _body_headings(path: Path) -> list[str]:
+    text = path.read_text(encoding="utf-8")
+    match = re.match(r"^---\n.*?\n---\n\n?(.*)$", text, re.DOTALL)
+    assert match, f"{path.name} needs a body after frontmatter"
+    return [line.strip() for line in match.group(1).splitlines() if line.strip()]
 
 
 def test_templates_use_obsidian_friendly_property_values():
@@ -62,6 +79,11 @@ def test_source_template_keeps_year_optional():
     frontmatter = _frontmatter(TEMPLATE_DIR / "Wiki_Source.md")
     assert "year" not in frontmatter
     assert "source_ids" not in frontmatter
+
+
+def test_templates_use_minimal_stable_body_anchors():
+    for path in sorted(TEMPLATE_DIR.glob("Wiki_*.md")):
+        assert _body_headings(path) == EXPECTED_TEMPLATE_HEADINGS[path.name]
 
 
 def test_foundation_template_supports_alias_matching():

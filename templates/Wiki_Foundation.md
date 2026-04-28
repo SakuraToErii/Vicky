@@ -13,12 +13,6 @@ relation_uses: []
 relation_compares_with: []
 ---
 
-## Definition
-
-## Why It Matters
-
-## Standard Form
+## Notes
 
 ## Relations
-
-## Related
