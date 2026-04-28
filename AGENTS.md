@@ -68,14 +68,24 @@ For every new `wiki/concepts/`, `wiki/theorems/`, or `wiki/ideas/` page:
    - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"`
    - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"`
    - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"`
-2. Resolve the target page path, then create or update that page.
-3. Fill the mandatory semantic follow-up immediately:
+2. Resolve the exact target page path from the page type and slug:
+   - source: `wiki/sources/{slug}.md`
+   - concept: `wiki/concepts/{slug}.md`
+   - theorem: `wiki/theorems/{slug}.md`
+   - person: `wiki/people/{slug}.md`
+   - idea: `wiki/ideas/{slug}.md`
+   - topic: `wiki/topics/{slug}.md`
+   - foundation: `wiki/foundations/{slug}.md`
+   - output: `wiki/outputs/{slug}.md`
+3. Create the missing page from its template, then edit that exact markdown file directly for body content.
+4. Verify the new-page body edit with `git diff -- <exact-target-path>`.
+5. Fill the mandatory semantic follow-up immediately:
    - add `key_sources` when the page comes from a source-backed claim
    - add the necessary `relation_*` properties
    - mirror every stable semantic edge in `## Relations`
    - add the reverse source mention or related-page mention in body text or a related section
-4. Append the `wiki/log.md` entry for that page.
-5. Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json`.
+6. Append the `wiki/log.md` entry for that page.
+7. Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json`.
 
 A page is complete when the target page, reverse links, semantic properties, log entry, and lint result are all in place.
 
