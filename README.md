@@ -95,8 +95,8 @@ obsidian files
 Repo-local graph diagnostics:
 
 ```bash
-.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki orphans
-.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki deadends
+obsidian orphans | rg '^wiki/(sources|concepts|theorems|foundations|people|ideas|topics|outputs)/' | rg -v '^wiki/outputs/' || true
+obsidian deadends | rg '^wiki/(sources|concepts|theorems|foundations|people|ideas|topics|outputs)/' | rg -v '^wiki/outputs/' || true
 ```
 
 Other useful skill scripts:
@@ -109,7 +109,7 @@ Other useful skill scripts:
 
 ## Legacy CLI Mapping
 
-The old `.tools/research_wiki.py` surface is now split by skill: slug and near-duplicate checks live in `ingest/scripts/`, frontmatter lookup lives in `ask/scripts/`, graph diagnostics live in `check/scripts/`, and reset lives in `reset/scripts/`. Log appends, property reads, property writes, file listing, search, links, backlinks, outlines, renames, and moves use Obsidian CLI.
+The old `.tools/research_wiki.py` surface is now split by skill: slug and near-duplicate checks live in `ingest/scripts/`, frontmatter lookup lives in `ask/scripts/`, reset lives in `reset/scripts/`, and graph diagnostics use Obsidian CLI plus Vicky path filters. Log appends, property reads, property writes, file listing, search, links, backlinks, outlines, renames, and moves use Obsidian CLI.
 
 ## Obsidian Notes
 

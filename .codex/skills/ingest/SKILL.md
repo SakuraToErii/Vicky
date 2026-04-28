@@ -56,20 +56,22 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 2. Run `obsidian templates` and confirm the `Wiki_*` templates are available.
 3. Read the source with `obsidian read path="<source-path>"` and extract title, source type, authors, year, and main ideas. Use a local text read for raw formats that Obsidian cannot read cleanly.
 4. Generate a lowercase hyphenated slug from the title with `./.venv/bin/python .codex/skills/ingest/scripts/slug.py "<title>"`.
-5. Create a missing source page with `obsidian create path="wiki/sources/{slug}.md" template="Wiki_Source"`.
-6. Fill source frontmatter with `obsidian property:set file=<slug> name=<field> value=<value> type=<type>`. Keep `source_path` pointing at the raw file.
-7. Detect user intent for non-source knowledge pages:
+5. Check slug occupancy with `obsidian files folder=wiki ext=md | rg '(^|/){slug}\\.md$' || true`.
+6. If the slug already exists, read the existing page and ask the user whether this source should update that page or use a different slug.
+7. Create a missing source page with `obsidian create path="wiki/sources/{slug}.md" template="Wiki_Source"`.
+8. Fill source frontmatter with `obsidian property:set file=<slug> name=<field> value=<value> type=<type>`. Keep `source_path` pointing at the raw file.
+9. Detect user intent for non-source knowledge pages:
    - If the user names target concepts, theorems, people, ideas, topics, or foundations, create or update only those pages.
    - If the user gives a reading question or interpretation, create or update only the pages needed to support that stated direction.
    - If the user only asks to ingest the source, produce candidate page proposals and wait for the next user message before creating or updating non-source pages.
-8. Format candidate page proposals with `target path`, `template`, `why create`, `source evidence`, and `priority`.
-9. Before proposing or creating a concept or theorem page, run `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"` or `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"`.
-10. Use `./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py` when you need metadata support from Semantic Scholar.
-11. Maintain semantic relation properties with `obsidian property:set file=<slug> name=<relation_field> value="[[target-slug]]"` for single relation targets. For multi-target relation fields, update the frontmatter list and verify with `obsidian property:read`.
-12. Mirror every stable relation property in `## Relations` with a short evidence sentence.
-13. Use `wiki/bases/Semantic Relations.base#Relation review` as the review surface for pages with empty relation fields.
-14. Verify discoverability with `obsidian search query="<new concept or source title>" path=wiki` and `obsidian search:context query="<new concept or source title>" path=wiki`.
-15. Append one log line with `obsidian append file=log content="## [YYYY-MM-DD] ingest | ..."`. Include `proposed: <paths>` when the ingest stops at proposals.
+10. Format candidate page proposals with `target path`, `template`, `why create`, `source evidence`, and `priority`.
+11. Before proposing or creating a concept or theorem page, run `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"` or `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"`.
+12. Use `./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py` when you need metadata support from Semantic Scholar.
+13. Maintain semantic relation properties with `obsidian property:set file=<slug> name=<relation_field> value="[[target-slug]]"` for single relation targets. For multi-target relation fields, update the frontmatter list and verify with `obsidian property:read`.
+14. Mirror every stable relation property in `## Relations` with a short evidence sentence.
+15. Use `wiki/bases/Semantic Relations.base#Relation review` as the review surface for pages with empty relation fields.
+16. Verify discoverability with `obsidian search query="<new concept or source title>" path=wiki` and `obsidian search:context query="<new concept or source title>" path=wiki`.
+17. Append one log line with `obsidian append file=log content="## [YYYY-MM-DD] ingest | ..."`. Include `proposed: <paths>` when the ingest stops at proposals.
 
 ## Constraints
 

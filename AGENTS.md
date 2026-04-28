@@ -125,11 +125,11 @@ Run commands from the vault root. Existing notes use `file=<slug>`. Exact destin
 | Unresolved links | `obsidian unresolved verbose format=json` |
 | List wiki files | `obsidian files folder=wiki ext=md` |
 
-Repo-local graph checks use skill tools:
+Repo-local graph checks use Obsidian CLI plus path filters:
 
 ```bash
-.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki orphans
-.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki deadends
+obsidian orphans | rg '^wiki/(sources|concepts|theorems|foundations|people|ideas|topics|outputs)/' | rg -v '^wiki/outputs/' || true
+obsidian deadends | rg '^wiki/(sources|concepts|theorems|foundations|people|ideas|topics|outputs)/' | rg -v '^wiki/outputs/' || true
 ```
 
 ## Log Format
@@ -154,7 +154,6 @@ Use Obsidian CLI for vault reads, note creation, property edits, search, link ch
 Use Python for:
 
 - strict lint rules: `.codex/skills/check/scripts/lint.py`
-- repo-local wiki graph diagnostics: `.codex/skills/check/scripts/wiki_graph.py`
 - frontmatter lookup fallback: `.codex/skills/ask/scripts/frontmatter_find.py`
 - deterministic slugging: `.codex/skills/ingest/scripts/slug.py`
 - pre-create duplicate checks: `.codex/skills/ingest/scripts/similar_pages.py`
@@ -173,7 +172,7 @@ The old monolithic `.tools/research_wiki.py` command surface is split by skill o
 | `find` | `.codex/skills/ask/scripts/frontmatter_find.py` |
 | `find-similar-concept` | `.codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"` |
 | `find-similar-theorem` | `.codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"` |
-| `query orphans` / `query deadends` | `.codex/skills/check/scripts/wiki_graph.py` |
+| `query orphans` / `query deadends` | `obsidian orphans` / `obsidian deadends` plus Vicky path filters |
 | `log` | `obsidian append file=log content="..."` |
 | `read-meta` | `obsidian property:read file=<slug> name=<field>` |
 | `set-meta` | `obsidian property:set file=<slug> name=<field> value=<value> type=<type>` |
