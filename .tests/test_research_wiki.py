@@ -88,6 +88,35 @@ class TestQueryOrphans:
         with pytest.raises(ValueError, match="duplicate slug names"):
             rw.query_orphans(str(wiki))
 
+    def test_heading_link_counts_as_inbound(self, wiki, capsys):
+        _write_page(wiki, "people", "john-doe", 'name: "John Doe"\nslug: john-doe\ntags: [ml]\nkey_sources: []')
+        _write_page(wiki, "topics", "topic-a", 'title: "Topic A"\nslug: topic-a\ntags: [ml]', "See [[john-doe#Biography]]")
+        rw.query_orphans(str(wiki))
+        payload = json.loads(capsys.readouterr().out.strip())
+        orphan_slugs = {item["slug"] for item in payload}
+        assert "john-doe" not in orphan_slugs
+
+
+class TestQueryDeadends:
+    def test_reports_pages_without_outgoing_links(self, wiki, capsys):
+        _write_page(wiki, "sources", "paper-a", 'title: "Paper A"\nslug: paper-a\nsource_kind: paper\nsource_path: raw/papers/paper-a.tex')
+        _write_page(wiki, "concepts", "concept-b", 'title: "Concept B"\nslug: concept-b\ntags: [ml]\nmaturity: working\nkey_sources: [paper-a]', "See [[paper-a]]")
+        _write_page(wiki, "outputs", "answer-a", 'title: "Answer A"\nslug: answer-a\ntags: [ml]', "")
+        rw.query_deadends(str(wiki))
+        payload = json.loads(capsys.readouterr().out.strip())
+        deadend_slugs = {item["slug"] for item in payload}
+        assert "paper-a" in deadend_slugs
+        assert "concept-b" not in deadend_slugs
+        assert "answer-a" not in deadend_slugs
+
+    def test_heading_link_counts_as_outgoing(self, wiki, capsys):
+        _write_page(wiki, "people", "john-doe", 'name: "John Doe"\nslug: john-doe\ntags: [ml]\nkey_sources: []')
+        _write_page(wiki, "topics", "topic-a", 'title: "Topic A"\nslug: topic-a\ntags: [ml]', "See [[john-doe#Biography]]")
+        rw.query_deadends(str(wiki))
+        payload = json.loads(capsys.readouterr().out.strip())
+        deadend_slugs = {item["slug"] for item in payload}
+        assert "topic-a" not in deadend_slugs
+
 
 class TestMetaRoundtrip:
     def test_set_meta_preserves_nested_frontmatter(self, wiki):

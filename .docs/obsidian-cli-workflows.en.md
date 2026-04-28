@@ -21,9 +21,9 @@ Run commands from the vault root. Existing notes should use `file=<slug>` so Obs
 | Backlinks | `obsidian backlinks file=<slug>` |
 | Outline | `obsidian outline file=<slug> format=json` |
 | Unresolved links | `obsidian unresolved verbose format=json` |
-| Orphans | `obsidian orphans` |
-| Dead ends | `obsidian deadends` |
 | List wiki files | `obsidian files folder=wiki ext=md` |
+| Wiki orphans | `./.venv/bin/python .tools/research_wiki.py query wiki orphans` |
+| Wiki dead ends | `./.venv/bin/python .tools/research_wiki.py query wiki deadends` |
 
 ## Bases Workflows
 
@@ -39,6 +39,8 @@ Obsidian Bases live in `wiki/bases/`:
 Bases read the same Markdown properties that Obsidian CLI writes with `obsidian property:set`. Use the CLI for reliable property writes and use Bases for browsing, filtering, sorting, and manual edits in Obsidian.
 
 Use `.docs/semantic-relations.en.md` for the canonical relation field list, value format, and frozen schema rule.
+
+`obsidian orphans` and `obsidian deadends` read the whole vault. Use the repo-local Python queries for `wiki/` health checks.
 
 ## Property Notes
 

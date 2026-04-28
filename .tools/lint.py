@@ -100,11 +100,7 @@ def check_support_files(wiki_dir: Path) -> list[LintIssue]:
             continue
         support_specs[filename] = {
             "template": template,
-            "validators": [
-                lambda content: content.startswith("filters:\n"),
-                lambda content: "formulas:\n" in content,
-                lambda content: "views:\n" in content,
-            ],
+            "validators": [lambda content, expected=template: content == expected],
             "message": "Support base does not match the current base template",
         }
     for filename, spec in support_specs.items():
@@ -264,7 +260,11 @@ def check_relation_consistency(wiki_dir: Path, pages: dict[str, Path]) -> list[L
         frontmatter = extract_frontmatter(content)
         rel_path = str(file_path.relative_to(wiki_dir))
         relations_body = _section_body(content, "## Relations")
-        body_targets = set(WIKILINK_RE.findall(relations_body))
+        body_targets = {
+            normalized
+            for target in WIKILINK_RE.findall(relations_body)
+            if (normalized := _normalize_link_target(target))
+        }
         property_targets: set[str] = set()
 
         for field in RELATION_FIELDS:

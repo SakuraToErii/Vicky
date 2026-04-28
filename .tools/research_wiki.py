@@ -166,6 +166,29 @@ def _all_markdown_pages(wiki_root: str) -> dict[str, Path]:
     return pages
 
 
+def _normalize_link_target(value: str) -> str:
+    text = str(value).strip().strip('"').strip("'")
+    match = WIKILINK_RE.fullmatch(text)
+    if match:
+        text = match.group(1)
+    return text.split("#", 1)[0]
+
+
+def _graph_links(wiki_root: str) -> tuple[dict[str, Path], dict[str, set[str]], dict[str, set[str]]]:
+    pages = _all_markdown_pages(wiki_root)
+    inbound: dict[str, set[str]] = {slug: set() for slug in pages}
+    outbound: dict[str, set[str]] = {slug: set() for slug in pages}
+    for slug, file_path in pages.items():
+        content = file_path.read_text(encoding="utf-8")
+        for target in WIKILINK_RE.findall(content):
+            link_target = _normalize_link_target(target)
+            if link_target not in pages:
+                continue
+            inbound[link_target].add(slug)
+            outbound[slug].add(link_target)
+    return pages, inbound, outbound
+
+
 def _match_filter(actual, pattern: str) -> bool:
     compare = COMPARE_RE.match(pattern)
     if compare:
@@ -314,13 +337,7 @@ def find_similar_theorem(wiki_root: str, candidate_title: str, candidate_aliases
 
 
 def query_orphans(wiki_root: str) -> None:
-    pages = _all_markdown_pages(wiki_root)
-    inbound: dict[str, set[str]] = {slug: set() for slug in pages}
-    for slug, file_path in pages.items():
-        content = file_path.read_text(encoding="utf-8")
-        for target in WIKILINK_RE.findall(content):
-            if target in inbound:
-                inbound[target].add(slug)
+    pages, inbound, _ = _graph_links(wiki_root)
     orphans = []
     for slug, file_path in pages.items():
         if file_path.parent.name == "outputs":
@@ -328,6 +345,18 @@ def query_orphans(wiki_root: str) -> None:
         if not inbound.get(slug):
             orphans.append({"slug": slug, "path": str(file_path.relative_to(Path(wiki_root)))})
     print(json.dumps(orphans, ensure_ascii=False, indent=2))
+
+
+def query_deadends(wiki_root: str) -> None:
+    pages, _, outbound = _graph_links(wiki_root)
+    deadends = []
+    for slug, file_path in pages.items():
+        if file_path.parent.name == "outputs":
+            continue
+        if outbound.get(slug):
+            continue
+        deadends.append({"slug": slug, "path": str(file_path.relative_to(Path(wiki_root)))})
+    print(json.dumps(deadends, ensure_ascii=False, indent=2))
 
 
 def get_stats(wiki_root: str, as_json: bool = False) -> dict:
@@ -592,7 +621,7 @@ def main() -> None:
 
     command = sub.add_parser("query", help="Run a wiki query")
     command.add_argument("wiki_root")
-    command.add_argument("subquery", choices=["orphans"])
+    command.add_argument("subquery", choices=["orphans", "deadends"])
 
     command = sub.add_parser("transition", help="Transition entity lifecycle status")
     command.add_argument("path")
@@ -672,7 +701,10 @@ def main() -> None:
         return
     if args.command == "query":
         try:
-            query_orphans(args.wiki_root)
+            if args.subquery == "orphans":
+                query_orphans(args.wiki_root)
+            else:
+                query_deadends(args.wiki_root)
         except ValueError as exc:
             print(json.dumps({"status": "error", "message": str(exc)}))
             sys.exit(1)

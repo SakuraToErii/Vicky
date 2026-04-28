@@ -102,6 +102,16 @@ class TestSupportFiles:
         assert any(fix.file == missing_base for fix in fixes)
         assert (wiki_dir / missing_base).read_text(encoding="utf-8") == schema_mod.BASE_FILE_TEMPLATES[missing_base]
 
+    def test_malformed_base_support_file_detected_and_fixed(self, wiki_dir):
+        malformed_base = next(iter(schema_mod.BASE_FILE_TEMPLATES))
+        (wiki_dir / malformed_base).write_text("filters:\n  and: []\nformulas:\nviews:\n", encoding="utf-8")
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any(issue.file == malformed_base for issue in issues)
+
+        fixes = lint_mod.apply_fixes(wiki_dir, issues, dry_run=False)
+        assert any(fix.file == malformed_base for fix in fixes)
+        assert (wiki_dir / malformed_base).read_text(encoding="utf-8") == schema_mod.BASE_FILE_TEMPLATES[malformed_base]
+
     def test_duplicate_slug_detected(self, wiki_dir):
         _write_page(
             wiki_dir,
@@ -271,6 +281,31 @@ class TestRelationConsistency:
                 '  - "[[paper-a]]"',
             ],
             "## Relations\n\n- Derived from [[paper-a]]: uses its setup.\n",
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert not any(issue.category == "relation" for issue in issues)
+
+    def test_relation_heading_link_pair_passes(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+            "## Summary\n\nKey detail.\n",
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            [
+                'title: "Concept A"',
+                "slug: concept-a",
+                "tags: [ml]",
+                "maturity: working",
+                "key_sources: [paper-a]",
+                'relation_derived_from: ["[[paper-a]]"]',
+            ],
+            "## Relations\n\n- Derived from [[paper-a#Summary]]: cites the relevant section.\n",
         )
         issues = lint_mod.run_lint(wiki_dir)
         assert not any(issue.category == "relation" for issue in issues)

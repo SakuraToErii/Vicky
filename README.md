@@ -88,10 +88,15 @@ Useful Obsidian CLI diagnostics:
 
 ```bash
 obsidian unresolved
-obsidian orphans
-obsidian deadends
 obsidian properties
 obsidian files
+```
+
+Repo-local graph diagnostics:
+
+```bash
+.venv/bin/python .tools/research_wiki.py query wiki orphans
+.venv/bin/python .tools/research_wiki.py query wiki deadends
 ```
 
 ## Obsidian Notes

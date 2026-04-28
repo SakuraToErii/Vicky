@@ -1,28 +1,28 @@
 filters:
   and:
-    - file.ext == "md"
-    - file.path != this.file.path
+    - 'file.ext == "md"'
+    - 'file.path != this.file.path'
     - or:
-        - file.inFolder("wiki/sources")
-        - file.inFolder("wiki/concepts")
-        - file.inFolder("wiki/theorems")
-        - file.inFolder("wiki/foundations")
-        - file.inFolder("wiki/people")
-        - file.inFolder("wiki/ideas")
-        - file.inFolder("wiki/topics")
-        - file.inFolder("wiki/outputs")
+        - 'file.inFolder("wiki/sources")'
+        - 'file.inFolder("wiki/concepts")'
+        - 'file.inFolder("wiki/topics")'
+        - 'file.inFolder("wiki/people")'
+        - 'file.inFolder("wiki/ideas")'
+        - 'file.inFolder("wiki/theorems")'
+        - 'file.inFolder("wiki/foundations")'
+        - 'file.inFolder("wiki/outputs")'
 formulas:
-  page_type: file.folder.replace("wiki/", "")
-  display_title: if(title, title, if(name, name, file.basename))
-  mentions_current: file.hasLink(this.file)
-  derived_from_current: if(file.hasProperty("relation_derived_from"), list(relation_derived_from).contains(this.file), false)
-  extends_current: if(file.hasProperty("relation_extends"), list(relation_extends).contains(this.file), false)
-  supports_current: if(file.hasProperty("relation_supports"), list(relation_supports).contains(this.file), false)
-  contradicts_current: if(file.hasProperty("relation_contradicts"), list(relation_contradicts).contains(this.file), false)
-  uses_current: if(file.hasProperty("relation_uses"), list(relation_uses).contains(this.file), false)
-  compares_with_current: if(file.hasProperty("relation_compares_with"), list(relation_compares_with).contains(this.file), false)
-  semantic_edge_to_current: formula.derived_from_current || formula.extends_current || formula.supports_current || formula.contradicts_current || formula.uses_current || formula.compares_with_current
-  incoming_reason: if(formula.semantic_edge_to_current, "semantic property", if(formula.mentions_current, "wikilink", ""))
+  page_type: 'file.folder.replace("wiki/", "")'
+  display_title: 'if(title, title, if(name, name, file.basename))'
+  mentions_current: 'file.hasLink(this.file)'
+  derived_from_current: 'if(file.hasProperty("relation_derived_from"), list(relation_derived_from).contains(this.file), false)'
+  extends_current: 'if(file.hasProperty("relation_extends"), list(relation_extends).contains(this.file), false)'
+  supports_current: 'if(file.hasProperty("relation_supports"), list(relation_supports).contains(this.file), false)'
+  contradicts_current: 'if(file.hasProperty("relation_contradicts"), list(relation_contradicts).contains(this.file), false)'
+  uses_current: 'if(file.hasProperty("relation_uses"), list(relation_uses).contains(this.file), false)'
+  compares_with_current: 'if(file.hasProperty("relation_compares_with"), list(relation_compares_with).contains(this.file), false)'
+  semantic_edge_to_current: 'formula.derived_from_current || formula.extends_current || formula.supports_current || formula.contradicts_current || formula.uses_current || formula.compares_with_current'
+  incoming_reason: 'if(formula.semantic_edge_to_current, "semantic property", if(formula.mentions_current, "wikilink", ""))'
 properties:
   formula.display_title:
     displayName: Title
@@ -51,8 +51,8 @@ views:
     name: Semantic neighbors
     filters:
       or:
-        - formula.semantic_edge_to_current == true
-        - formula.mentions_current == true
+        - 'formula.semantic_edge_to_current == true'
+        - 'formula.mentions_current == true'
     groupBy:
       property: formula.incoming_reason
       direction: DESC
@@ -71,7 +71,7 @@ views:
     name: Relation-only
     filters:
       and:
-        - formula.semantic_edge_to_current == true
+        - 'formula.semantic_edge_to_current == true'
     groupBy:
       property: formula.page_type
       direction: ASC
@@ -88,7 +88,7 @@ views:
     name: Mentions
     filters:
       and:
-        - formula.mentions_current == true
+        - 'formula.mentions_current == true'
     groupBy:
       property: formula.page_type
       direction: ASC
