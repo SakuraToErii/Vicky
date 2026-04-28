@@ -1,21 +1,21 @@
 filters:
   and:
-    - 'file.ext == "md"'
+    - file.ext == "md"
     - or:
-        - 'file.inFolder("wiki/sources")'
-        - 'file.inFolder("wiki/concepts")'
-        - 'file.inFolder("wiki/topics")'
-        - 'file.inFolder("wiki/people")'
-        - 'file.inFolder("wiki/ideas")'
-        - 'file.inFolder("wiki/theorems")'
-        - 'file.inFolder("wiki/foundations")'
-        - 'file.inFolder("wiki/outputs")'
+        - file.inFolder("wiki/sources")
+        - file.inFolder("wiki/concepts")
+        - file.inFolder("wiki/topics")
+        - file.inFolder("wiki/people")
+        - file.inFolder("wiki/ideas")
+        - file.inFolder("wiki/theorems")
+        - file.inFolder("wiki/foundations")
+        - file.inFolder("wiki/outputs")
 formulas:
-  page_type: 'file.folder.replace("wiki/", "")'
-  display_title: 'if(title, title, if(name, name, file.basename))'
-  relation_count: 'if(file.hasProperty("relation_derived_from"), list(relation_derived_from).length, 0) + if(file.hasProperty("relation_extends"), list(relation_extends).length, 0) + if(file.hasProperty("relation_supports"), list(relation_supports).length, 0) + if(file.hasProperty("relation_contradicts"), list(relation_contradicts).length, 0) + if(file.hasProperty("relation_uses"), list(relation_uses).length, 0) + if(file.hasProperty("relation_compares_with"), list(relation_compares_with).length, 0)'
-  source_count: 'if(file.hasProperty("key_sources"), list(key_sources).length, 0)'
-  needs_relation_review: 'formula.relation_count == 0 && (file.inFolder("wiki/concepts") || file.inFolder("wiki/topics") || file.inFolder("wiki/people") || file.inFolder("wiki/ideas") || file.inFolder("wiki/theorems") || file.inFolder("wiki/foundations") || file.inFolder("wiki/outputs"))'
+  page_type: file.folder.replace("wiki/", "")
+  display_title: if(title, title, if(name, name, file.basename))
+  relation_count: if(file.hasProperty("relation_derived_from"), list(relation_derived_from).length, 0) + if(file.hasProperty("relation_extends"), list(relation_extends).length, 0) + if(file.hasProperty("relation_supports"), list(relation_supports).length, 0) + if(file.hasProperty("relation_contradicts"), list(relation_contradicts).length, 0) + if(file.hasProperty("relation_uses"), list(relation_uses).length, 0) + if(file.hasProperty("relation_compares_with"), list(relation_compares_with).length, 0)
+  source_count: if(file.hasProperty("key_sources"), list(key_sources).length, 0)
+  needs_relation_review: formula.relation_count == 0 && (file.inFolder("wiki/concepts") || file.inFolder("wiki/topics") || file.inFolder("wiki/people") || file.inFolder("wiki/ideas") || file.inFolder("wiki/theorems") || file.inFolder("wiki/foundations") || file.inFolder("wiki/outputs"))
 properties:
   formula.display_title:
     displayName: Title
@@ -69,7 +69,7 @@ views:
     name: Relation review
     filters:
       and:
-        - 'formula.needs_relation_review == true'
+        - formula.needs_relation_review == true
     groupBy:
       property: formula.page_type
       direction: ASC
@@ -87,7 +87,7 @@ views:
     name: Sources
     filters:
       and:
-        - 'file.inFolder("wiki/sources")'
+        - file.inFolder("wiki/sources")
     order:
       - formula.display_title
       - source_kind
@@ -99,9 +99,9 @@ views:
     name: Concepts and theorems
     filters:
       or:
-        - 'file.inFolder("wiki/concepts")'
-        - 'file.inFolder("wiki/theorems")'
-        - 'file.inFolder("wiki/foundations")'
+        - file.inFolder("wiki/concepts")
+        - file.inFolder("wiki/theorems")
+        - file.inFolder("wiki/foundations")
     groupBy:
       property: formula.page_type
       direction: ASC
@@ -121,9 +121,9 @@ views:
     name: Ideas and outputs
     filters:
       or:
-        - 'file.inFolder("wiki/ideas")'
-        - 'file.inFolder("wiki/topics")'
-        - 'file.inFolder("wiki/outputs")'
+        - file.inFolder("wiki/ideas")
+        - file.inFolder("wiki/topics")
+        - file.inFolder("wiki/outputs")
     groupBy:
       property: formula.page_type
       direction: ASC
