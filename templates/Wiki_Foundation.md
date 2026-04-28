@@ -1,10 +1,10 @@
 ---
 title: "{{title}}"
 slug: ""
+tags: []
 aliases: []
 domain: ""
 status: canonical
-tags: []
 relation_derived_from: []
 relation_extends: []
 relation_supports: []

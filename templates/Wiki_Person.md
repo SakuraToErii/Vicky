@@ -1,9 +1,9 @@
 ---
-name: "{{title}}"
+title: "{{title}}"
 slug: ""
+tags: []
 aliases: []
 affiliation: ""
-tags: []
 key_sources: []
 relation_derived_from: []
 relation_extends: []

@@ -23,7 +23,7 @@ def _scan_similar(entity_dir: Path, entity_type: str, candidate_names: list[str]
         return matches
     for file_path in sorted(entity_dir.glob("*.md")):
         frontmatter = parse_frontmatter_file(file_path)
-        title = str(frontmatter.get("title", "") or frontmatter.get("name", ""))
+        title = str(frontmatter.get("title", ""))
         aliases = frontmatter.get("aliases", []) or []
         if not isinstance(aliases, list):
             aliases = []

@@ -1,6 +1,7 @@
 ---
 title: "{{title}}"
 slug: ""
+tags: []
 aliases: []
 theorem_kind: theorem
 status: draft
@@ -11,7 +12,6 @@ relation_supports: []
 relation_contradicts: []
 relation_uses: []
 relation_compares_with: []
-tags: []
 ---
 
 ## Statement

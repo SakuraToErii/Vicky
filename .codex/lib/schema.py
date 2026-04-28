@@ -48,7 +48,7 @@ REQUIRED_FIELDS = {
     "sources": ["title", "slug", "source_kind", "source_path"],
     "concepts": ["title", "slug", "tags", "maturity", "key_sources"],
     "topics": ["title", "slug", "tags"],
-    "people": ["name", "slug", "tags"],
+    "people": ["title", "slug", "tags"],
     "ideas": ["title", "slug", "status", "tags", "priority"],
     "theorems": ["title", "slug", "theorem_kind", "status", "key_sources"],
     "foundations": ["title", "slug", "domain", "status"],
@@ -85,7 +85,7 @@ FIELD_DEFAULTS = {
 }
 
 PAGE_TYPE_FORMULA = 'file.folder.replace("wiki/", "")'
-DISPLAY_TITLE_FORMULA = "if(title, title, if(name, name, file.basename))"
+DISPLAY_TITLE_FORMULA = "if(title, title, file.basename)"
 
 
 def _folder_lines(folders: list[str], indent: str = "        ") -> str:

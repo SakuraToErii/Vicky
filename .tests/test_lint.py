@@ -176,12 +176,29 @@ class TestOrphans:
             wiki_dir,
             "people",
             "john-doe",
-            ['name: "John Doe"', "slug: john-doe", "tags: [ml]", "key_sources: []"],
+            ['title: "John Doe"', "slug: john-doe", "tags: [ml]", "key_sources: []"],
         )
         pages = lint_mod.find_all_pages(wiki_dir)
         _, incoming = lint_mod.check_broken_links(wiki_dir, pages)
         issues = lint_mod.check_orphan_pages(wiki_dir, pages, incoming)
         assert any("john-doe" in issue.file for issue in issues)
+
+
+class TestSlugField:
+    def test_slug_field_mismatch_detected_and_fixed(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "flash-attention",
+            ['title: "Flash Attention"', "slug: flash-attention-v2", "tags: [attention]", "maturity: working", "key_sources: []"],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any(issue.category == "slug-field" for issue in issues)
+
+        fixes = lint_mod.apply_fixes(wiki_dir, issues, dry_run=False)
+        assert any(fix.action == "Set slug to flash-attention" for fix in fixes)
+        content = (wiki_dir / "concepts" / "flash-attention.md").read_text(encoding="utf-8")
+        assert "slug: flash-attention\n" in content
 
 
 class TestFieldValues:

@@ -1,9 +1,9 @@
 ---
 title: "{{title}}"
 slug: ""
+tags: []
 status: fleeting
 priority: 3
-tags: []
 relation_derived_from: []
 relation_extends: []
 relation_supports: []

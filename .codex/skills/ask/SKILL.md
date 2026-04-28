@@ -45,7 +45,7 @@ Query the maintained wiki.
    - Repeat this for `relation_derived_from`, `relation_extends`, `relation_supports`, `relation_contradicts`, `relation_uses`, and `relation_compares_with`.
 6. Use `./.venv/bin/python .codex/skills/ask/scripts/frontmatter_find.py wiki <page-type> --<field> <value>` when Obsidian property search needs a deterministic frontmatter filter.
 7. For each strong candidate, expand one hop with `obsidian links file=<slug>` and `obsidian backlinks file=<slug>`.
-8. Read properties for top candidates with `obsidian property:read file=<slug> name=<field>` where useful. Include title/name, tags, status/maturity, key_sources, source_path, and relation fields.
+8. Read properties for top candidates with `obsidian property:read file=<slug> name=<field>` where useful. Include title, tags, status/maturity, key_sources, source_path, and relation fields.
 9. Read outlines for long candidates with `obsidian outline file=<slug> format=json`.
 10. Use `obsidian files folder=wiki ext=md` as the broad-query fallback when search returns too few candidates or the user asks for a whole-vault map.
 11. Rerank candidates using this priority: title/slug match, `search:context` match, relation-property match, one-hop link neighbor, page type, source recency or maturity fields when available.

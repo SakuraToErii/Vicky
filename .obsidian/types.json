@@ -8,7 +8,6 @@
     "domain": "text",
     "key_sources": "multitext",
     "maturity": "text",
-    "name": "text",
     "priority": "number",
     "relation_compares_with": "multitext",
     "relation_contradicts": "multitext",

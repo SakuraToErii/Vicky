@@ -6,7 +6,7 @@ Vicky turns source material in `raw/` into long-lived Markdown notes in `wiki/`.
 
 Vicky follows Andrej Karpathy's [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern: raw sources feed a maintained Markdown wiki, the schema lives in `AGENTS.md`, and the core loop is ingest, ask, and check. Vicky adapts that pattern for an Obsidian-first personal research workflow with Bases, Obsidian CLI, and lightweight repo-local scripts.
 
-The name `Vicky` echoes `wiki` and gives the vault a human name. It reads as a familiar female given name in English and keeps the project memorable.
+The name `Vicky` nods to `wiki` and gives the project a warm, memorable identity.
 
 ## What Vicky Optimizes For
 

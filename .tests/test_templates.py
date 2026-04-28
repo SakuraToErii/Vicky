@@ -20,7 +20,17 @@ TEMPLATE_DIR = PROJECT_ROOT / "templates"
 TYPES_PATH = PROJECT_ROOT / ".obsidian" / "types.json"
 DEPRECATED_TEMPLATE_FIELDS = {"date_updated", "source_ids"}
 LIST_FIELDS = {"aliases", "authors", "key_sources", "tags", *RELATION_FIELDS}
-TEXT_FIELDS = {"title", "name", "slug", "source_kind", "source_path", "domain", "status", "maturity", "theorem_kind", "affiliation"}
+TEXT_FIELDS = {"title", "slug", "source_kind", "source_path", "domain", "status", "maturity", "theorem_kind", "affiliation"}
+EXPECTED_TEMPLATE_FIELD_ORDER = {
+    "Wiki_Concept.md": ["title", "slug", "tags", "aliases", "maturity", "key_sources", *RELATION_FIELDS],
+    "Wiki_Foundation.md": ["title", "slug", "tags", "aliases", "domain", "status", *RELATION_FIELDS],
+    "Wiki_Idea.md": ["title", "slug", "tags", "status", "priority", *RELATION_FIELDS],
+    "Wiki_Output.md": ["title", "slug", "tags", *RELATION_FIELDS],
+    "Wiki_Person.md": ["title", "slug", "tags", "aliases", "affiliation", "key_sources", *RELATION_FIELDS],
+    "Wiki_Source.md": ["title", "slug", "tags", "authors", "source_kind", "source_path", "date_added"],
+    "Wiki_Theorem.md": ["title", "slug", "tags", "aliases", "theorem_kind", "status", "key_sources", *RELATION_FIELDS],
+    "Wiki_Topic.md": ["title", "slug", "tags", *RELATION_FIELDS],
+}
 
 
 def _frontmatter(path: Path) -> dict:
@@ -37,6 +47,7 @@ def test_templates_use_obsidian_friendly_property_values():
         frontmatter = _frontmatter(path)
         assert not (set(frontmatter) & DEPRECATED_TEMPLATE_FIELDS)
         assert all(value is not None for value in frontmatter.values())
+        assert list(frontmatter.keys()) == EXPECTED_TEMPLATE_FIELD_ORDER[path.name]
         for field in LIST_FIELDS & set(frontmatter):
             assert isinstance(frontmatter[field], list), f"{path.name}:{field} should be a YAML list"
         for field in TEXT_FIELDS & set(frontmatter):
@@ -58,6 +69,12 @@ def test_foundation_template_supports_alias_matching():
     assert frontmatter["aliases"] == []
 
 
+def test_person_template_uses_title_field():
+    frontmatter = _frontmatter(TEMPLATE_DIR / "Wiki_Person.md")
+    assert "title" in frontmatter
+    assert "name" not in frontmatter
+
+
 def test_obsidian_property_types_match_template_schema():
     types = json.loads(TYPES_PATH.read_text(encoding="utf-8"))["types"]
     assert "date_updated" not in types
@@ -67,6 +84,7 @@ def test_obsidian_property_types_match_template_schema():
     assert types["priority"] == "number"
     assert types["year"] == "number"
     assert types["date_added"] == "date"
+    assert "name" not in types
     for field in RELATION_FIELDS:
         assert types[field] == "multitext"
 

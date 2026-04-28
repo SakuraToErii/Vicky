@@ -1,8 +1,8 @@
 ---
 title: "{{title}}"
 slug: ""
-aliases: []
 tags: []
+aliases: []
 maturity: seed
 key_sources: []
 relation_derived_from: []

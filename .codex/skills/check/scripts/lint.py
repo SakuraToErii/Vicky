@@ -185,6 +185,28 @@ def check_missing_fields(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIss
     return issues
 
 
+def check_slug_fields(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIssue]:
+    issues: list[LintIssue] = []
+    for slug, file_path in pages.items():
+        frontmatter = extract_frontmatter(file_path.read_text(encoding="utf-8"))
+        rel_path = str(file_path.relative_to(wiki_dir))
+        field_slug = str(frontmatter.get("slug", "")).strip()
+        if not field_slug:
+            continue
+        if field_slug != slug:
+            issues.append(
+                LintIssue(
+                    "🔴",
+                    "slug-field",
+                    rel_path,
+                    f"slug={field_slug!r} does not match filename {slug!r}",
+                    fixable=True,
+                    suggestion=f"Set slug to {slug!r}",
+                )
+            )
+    return issues
+
+
 def check_broken_links(
     wiki_dir: Path,
     pages: dict[str, Path],
@@ -404,6 +426,19 @@ def _fix_missing_field(wiki_dir: Path, issue: LintIssue) -> FixResult | None:
     return FixResult(issue.file, f"Add {field}: {default_value}")
 
 
+def _fix_slug_field(wiki_dir: Path, issue: LintIssue) -> FixResult | None:
+    page_path = wiki_dir / issue.file
+    content = page_path.read_text(encoding="utf-8")
+    frontmatter = extract_frontmatter(content)
+    match_fm = FRONTMATTER_RE.match(content)
+    if not match_fm:
+        return None
+    frontmatter["slug"] = page_path.stem
+    updated = f"---\n{_serialize_frontmatter(frontmatter)}---{content[match_fm.end():]}"
+    page_path.write_text(updated, encoding="utf-8")
+    return FixResult(issue.file, f"Set slug to {page_path.stem}")
+
+
 def _fix_xref(wiki_dir: Path, issue: LintIssue) -> FixResult | None:
     match = re.search(r"sources/(\S+)\.md does not link back to \[\[(\S+)\]\]", issue.message)
     if not match:
@@ -444,6 +479,15 @@ def apply_fixes(wiki_dir: Path, issues: list[LintIssue], dry_run: bool = False) 
             if result:
                 fixes.append(result)
             continue
+        if issue.category == "slug-field":
+            if dry_run:
+                page_path = wiki_dir / issue.file
+                fixes.append(FixResult(issue.file, f"Set slug to {page_path.stem}"))
+                continue
+            result = _fix_slug_field(wiki_dir, issue)
+            if result:
+                fixes.append(result)
+            continue
         if "does not link back" in issue.message:
             if dry_run:
                 fixes.append(FixResult(issue.file, issue.suggestion or "Repair reverse link"))
@@ -460,6 +504,7 @@ def run_lint(wiki_dir: Path) -> list[LintIssue]:
     pages, duplicates = _collect_pages(wiki_dir)
     issues.extend(check_duplicate_slugs(wiki_dir, duplicates))
     issues.extend(check_missing_fields(wiki_dir, pages))
+    issues.extend(check_slug_fields(wiki_dir, pages))
     broken, incoming = check_broken_links(wiki_dir, pages, duplicates)
     issues.extend(broken)
     issues.extend(check_orphan_pages(wiki_dir, pages, incoming))
