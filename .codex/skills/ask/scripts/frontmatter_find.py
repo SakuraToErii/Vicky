@@ -14,9 +14,9 @@ LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
-from vicky.frontmatter import parse_frontmatter_file
-from vicky.markdown import WIKILINK_RE
-from vicky.schema import INDEXED_DIRS
+from frontmatter import parse_frontmatter_file
+from markdown import WIKILINK_RE
+from schema import INDEXED_DIRS
 
 COMPARE_RE = re.compile(r"^([<>]=?|!=)(.+)$")
 

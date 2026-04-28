@@ -37,7 +37,7 @@ templates/
 
 Engineering support stays under `.codex/`, `.tests/`, `.config/`, `.obsidian/`, and `.github/`.
 
-Codex skills follow the standard package shape: each skill has `SKILL.md`, optional `agents/openai.yaml`, and executable helpers under `scripts/`. Shared repo-local helpers live in `.codex/lib/vicky/`.
+Codex skills follow the standard package shape: each skill has `SKILL.md`, optional `agents/openai.yaml`, and executable helpers under `scripts/`. Shared repo-local helpers live in `.codex/lib/`.
 
 ## Workflow
 
@@ -47,6 +47,8 @@ Codex skills follow the standard package shape: each skill has `SKILL.md`, optio
 4. Review semantic edges in `wiki/bases/Semantic Relations.base`.
 5. Ask questions against the maintained wiki through the repo-local `ask` skill.
 6. Run lint when the vault structure changes.
+
+New concept, theorem, and idea pages follow a fixed post-processing path: run duplicate checks before writing, finish one page at a time, fill `key_sources` and `relation_*`, add the reverse source or related-page mention, append `wiki/log.md`, then finish with a clean lint run.
 
 ## Semantic Graph
 
@@ -108,6 +110,7 @@ Other useful skill scripts:
 .venv/bin/python .codex/skills/ingest/scripts/slug.py "Flash Attention"
 .venv/bin/python .codex/skills/ask/scripts/frontmatter_find.py wiki concepts --maturity working
 .venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "Gradient Descent"
+.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "Open Question"
 ```
 
 ## Legacy CLI Mapping

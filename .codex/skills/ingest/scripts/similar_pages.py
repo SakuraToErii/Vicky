@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Find similar concept, foundation, or theorem pages before creating new pages."""
+"""Find similar concept, idea, foundation, or theorem pages before creating new pages."""
 
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
-from vicky.frontmatter import parse_frontmatter_file
-from vicky.slug import phrase_match_score
+from frontmatter import parse_frontmatter_file
+from slug_utils import phrase_match_score
 
 
 def _scan_similar(entity_dir: Path, entity_type: str, candidate_names: list[str], key_field: str) -> list[dict]:
@@ -76,10 +76,15 @@ def find_similar_theorem(wiki_root: Path, candidate_title: str, candidate_aliase
     return _scan_similar(wiki_root / "theorems", "theorem", candidate_names, "key_sources")
 
 
+def find_similar_idea(wiki_root: Path, candidate_title: str, candidate_aliases: list[str] | None = None) -> list[dict]:
+    candidate_names = [candidate_title] + [alias for alias in (candidate_aliases or []) if alias]
+    return _scan_similar(wiki_root / "ideas", "idea", candidate_names, "tags")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("wiki_root")
-    parser.add_argument("kind", choices=["concept", "theorem"])
+    parser.add_argument("kind", choices=["concept", "theorem", "idea"])
     parser.add_argument("title")
     parser.add_argument("--aliases", default="", help="Comma-separated aliases")
     args = parser.parse_args()
@@ -88,6 +93,8 @@ def main() -> None:
     wiki_root = Path(args.wiki_root)
     if args.kind == "concept":
         results = find_similar_concept(wiki_root, args.title, aliases)
+    elif args.kind == "idea":
+        results = find_similar_idea(wiki_root, args.title, aliases)
     else:
         results = find_similar_theorem(wiki_root, args.title, aliases)
     print(json.dumps(results, ensure_ascii=False, indent=2))

@@ -1,1 +1,0 @@
-"""Shared Vicky wiki helpers."""

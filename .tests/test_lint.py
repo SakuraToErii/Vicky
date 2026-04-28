@@ -12,7 +12,7 @@ SCRIPTS_DIR = PROJECT_ROOT / ".codex" / "skills" / "check" / "scripts"
 sys.path.insert(0, str(LIB_DIR))
 sys.path.insert(0, str(SCRIPTS_DIR))
 import lint as lint_mod
-import vicky.schema as schema_mod
+import schema as schema_mod
 
 
 def test_relation_schema_is_frozen():

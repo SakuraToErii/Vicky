@@ -13,7 +13,7 @@ SCRIPTS_DIR = PROJECT_ROOT / ".codex" / "skills" / "reset" / "scripts"
 sys.path.insert(0, str(LIB_DIR))
 sys.path.insert(0, str(SCRIPTS_DIR))
 import reset_wiki as rw
-import vicky.schema as schema_mod
+import schema as schema_mod
 
 
 @pytest.fixture

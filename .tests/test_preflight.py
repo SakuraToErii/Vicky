@@ -10,8 +10,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 sys.path.insert(0, str(LIB_DIR))
 
-from vicky import preflight
-from vicky.frontmatter import parse_frontmatter
+import preflight
+from frontmatter import parse_frontmatter
 
 
 def test_missing_commands_reports_missing_binary(monkeypatch):

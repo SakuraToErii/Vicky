@@ -32,9 +32,9 @@ Treat `raw/` as user-owned input. Read from it and write to `wiki/`.
 - `.codex/skills/*/SKILL.md` holds workflow instructions
 - `.codex/skills/*/scripts/` holds executable helpers owned by one skill
 - `.codex/skills/*/agents/openai.yaml` holds optional product metadata for the skill package
-- `.codex/lib/vicky/` holds repo-local shared schema, frontmatter, markdown, slug, and support-file helpers
+- `.codex/lib/` holds repo-local shared schema, frontmatter, markdown, slug, and support-file helpers
 
-The shared `.codex/lib/vicky/` package is a Vicky repo convention. Skill scripts add it to `sys.path` so duplicated schema logic stays centralized while each skill keeps executable helpers in the standard `scripts/` directory.
+The shared `.codex/lib/` package is a Vicky repo convention. Skill scripts add it to `sys.path` so duplicated schema logic stays centralized while each skill keeps executable helpers in the standard `scripts/` directory.
 
 ## Page And Link Rules
 
@@ -57,6 +57,27 @@ During ingest, create the source page automatically. Create or update non-source
 | `sources/A` links `[[person-D]]` | `people/D` includes `A` in `key_sources` |
 | `concepts/K` links `[[topic-T]]` | `topics/T` mentions `K` in body or related section |
 | any page links `[[foundation-X]]` | foundation pages can receive one-way links |
+
+## New Page Post-Processing Contract
+
+Treat each new or newly split knowledge page as one finished unit of work. Complete its post-processing before creating the next new page in the same turn.
+
+For every new `wiki/concepts/`, `wiki/theorems/`, or `wiki/ideas/` page:
+
+1. Run the duplicate check before writing:
+   - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"`
+   - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"`
+   - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"`
+2. Resolve the target page path, then create or update that page.
+3. Fill the mandatory semantic follow-up immediately:
+   - add `key_sources` when the page comes from a source-backed claim
+   - add the necessary `relation_*` properties
+   - mirror every stable semantic edge in `## Relations`
+   - add the reverse source mention or related-page mention in body text or a related section
+4. Append the `wiki/log.md` entry for that page.
+5. Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json`.
+
+A page is complete when the target page, reverse links, semantic properties, log entry, and lint result are all in place.
 
 ## Semantic Relations
 
@@ -168,10 +189,11 @@ The old monolithic `.tools/research_wiki.py` command surface is split by skill o
 | Old command | Current owner |
 |---|---|
 | `init` | repository skeleton ships with GitHub checkout; setup and check verify the existing scaffold |
-| `slug` | `.codex/skills/ingest/scripts/slug.py` and `.codex/lib/vicky/slug.py` |
+| `slug` | `.codex/skills/ingest/scripts/slug.py` and `.codex/lib/slug_utils.py` |
 | `find` | `.codex/skills/ask/scripts/frontmatter_find.py` |
 | `find-similar-concept` | `.codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"` |
 | `find-similar-theorem` | `.codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"` |
+| `find-similar-idea` | `.codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"` |
 | `query orphans` / `query deadends` | `obsidian orphans` / `obsidian deadends` plus Vicky path filters |
 | `log` | `obsidian append file=log content="..."` |
 | `read-meta` | `obsidian property:read file=<slug> name=<field>` |

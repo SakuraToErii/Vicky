@@ -12,7 +12,7 @@ LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
-from vicky.slug import slugify
+from slug_utils import slugify
 
 
 def main() -> None:

@@ -22,7 +22,7 @@ LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
-import vicky.env  # noqa: F401 - load .env files for API keys
+import env  # noqa: F401 - load .env files for API keys
 
 import requests
 

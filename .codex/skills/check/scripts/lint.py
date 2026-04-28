@@ -17,10 +17,10 @@ LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
-from vicky.frontmatter import FRONTMATTER_RE, parse_frontmatter, parse_scalar as _parse_scalar, serialize_frontmatter as _serialize_frontmatter
-from vicky.markdown import WIKILINK_RE, find_wikilinks
-from vicky.schema import FIELD_DEFAULTS, INDEXED_DIRS, RELATION_FIELDS, REQUIRED_FIELDS, VALID_VALUES
-from vicky.support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
+from frontmatter import FRONTMATTER_RE, parse_frontmatter, parse_scalar as _parse_scalar, serialize_frontmatter as _serialize_frontmatter
+from markdown import WIKILINK_RE, find_wikilinks
+from schema import FIELD_DEFAULTS, INDEXED_DIRS, RELATION_FIELDS, REQUIRED_FIELDS, VALID_VALUES
+from support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
 
 
 class LintIssue:

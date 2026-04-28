@@ -14,8 +14,8 @@ LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
-from vicky.schema import INDEXED_DIRS, RAW_DIRS, SUPPORT_DIRS
-from vicky.support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
+from schema import INDEXED_DIRS, RAW_DIRS, SUPPORT_DIRS
+from support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
 
 ALL_SCOPES = ["wiki", "raw", "log", "checkpoints"]
 

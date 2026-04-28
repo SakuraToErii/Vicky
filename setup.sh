@@ -41,7 +41,7 @@ fi
 
 echo ""
 info "Checking required CLIs..."
-"$PYTHON_CMD" .codex/lib/vicky/preflight.py commands codex obsidian rg
+"$PYTHON_CMD" .codex/lib/preflight.py commands codex obsidian rg
 ok "Required CLIs available"
 
 echo ""
@@ -68,7 +68,7 @@ ok "Dependencies installed"
 
 echo ""
 info "Verifying Python packages..."
-"$VENV_PYTHON_ABS" .codex/lib/vicky/preflight.py modules requests yaml
+"$VENV_PYTHON_ABS" .codex/lib/preflight.py modules requests yaml
 ok "Python packages available"
 
 echo ""
@@ -92,7 +92,7 @@ fi
 echo ""
 info "Verifying core imports..."
 
-if PYTHONPATH="$PROJECT_ROOT/.codex/lib:$PROJECT_ROOT/.codex/skills/check/scripts:$PROJECT_ROOT/.codex/skills/ingest/scripts:$PROJECT_ROOT/.codex/skills/reset/scripts:$PROJECT_ROOT/.codex/skills/ask/scripts" "$VENV_PYTHON_ABS" -c "from vicky.schema import INDEXED_DIRS; from lint import run_lint; from fetch_s2 import search; from reset_wiki import plan; from slug import slugify; from similar_pages import find_similar_concept; from frontmatter_find import find_entities" >/dev/null 2>&1; then
+if PYTHONPATH="$PROJECT_ROOT/.codex/lib:$PROJECT_ROOT/.codex/skills/check/scripts:$PROJECT_ROOT/.codex/skills/ingest/scripts:$PROJECT_ROOT/.codex/skills/reset/scripts:$PROJECT_ROOT/.codex/skills/ask/scripts" "$VENV_PYTHON_ABS" -c "from schema import INDEXED_DIRS; from lint import run_lint; from fetch_s2 import search; from reset_wiki import plan; from slug import slugify; from similar_pages import find_similar_concept; from frontmatter_find import find_entities" >/dev/null 2>&1; then
     ok "Core scripts import cleanly"
 else
     fail "Core script import failed"

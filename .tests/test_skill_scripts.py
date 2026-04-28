@@ -17,7 +17,7 @@ sys.path.insert(0, str(INGEST_SCRIPTS))
 
 import frontmatter_find
 import similar_pages
-from vicky.slug import slugify
+from slug_utils import slugify
 
 
 def _write_page(wiki, entity_type, slug, frontmatter, body=""):
@@ -112,3 +112,23 @@ def test_similar_pages_cli_theorem(tmp_path):
     )
     payload = json.loads(result.stdout)
     assert payload[0]["slug"] == "banach-fixed-point"
+
+
+def test_similar_pages_cli_idea(tmp_path):
+    wiki = tmp_path / "wiki"
+    _write_page(
+        wiki,
+        "ideas",
+        "open-questions-in-linear-attention",
+        'title: "Open Questions in Linear Attention"\nslug: open-questions-in-linear-attention\nstatus: working\npriority: 2\ntags: [attention, open-question]',
+    )
+    result = subprocess.run(
+        [sys.executable, str(INGEST_SCRIPTS / "similar_pages.py"), str(wiki), "idea", "Open Question in Linear Attention"],
+        capture_output=True,
+        text=True,
+        cwd=str(PROJECT_ROOT),
+        check=True,
+    )
+    payload = json.loads(result.stdout)
+    assert payload[0]["slug"] == "open-questions-in-linear-attention"
+    assert payload[0]["entity_type"] == "idea"

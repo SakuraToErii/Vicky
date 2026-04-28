@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from vicky.schema import BASE_FILE_TEMPLATES
+from schema import BASE_FILE_TEMPLATES
 
 LOG_TEMPLATE = "# Vicky Log\n\n"
 

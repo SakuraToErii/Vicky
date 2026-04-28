@@ -23,6 +23,7 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 - user-approved updates to `wiki/foundations/*.md`
 - relation review through `wiki/bases/Semantic Relations.base`
 - updated `wiki/log.md`
+- one-page-at-a-time post-processing with lint-clean completion
 
 ## References
 
@@ -65,13 +66,20 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
    - If the user gives a reading question or interpretation, create or update only the pages needed to support that stated direction.
    - If the user only asks to ingest the source, produce candidate page proposals and wait for the next user message before creating or updating non-source pages.
 10. Format candidate page proposals with `target path`, `template`, `why create`, `source evidence`, and `priority`.
-11. Before proposing or creating a concept or theorem page, run `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"` or `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"`.
-12. Use `./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py` when you need metadata support from Semantic Scholar.
-13. Maintain semantic relation properties with `obsidian property:set file=<slug> name=<relation_field> value="[[target-slug]]"` for single relation targets. For multi-target relation fields, update the frontmatter list and verify with `obsidian property:read`.
-14. Mirror every stable relation property in `## Relations` with a short evidence sentence.
-15. Use `wiki/bases/Semantic Relations.base#Relation review` as the review surface for pages with empty relation fields.
-16. Verify discoverability with `obsidian search query="<new concept or source title>" path=wiki` and `obsidian search:context query="<new concept or source title>" path=wiki`.
-17. Append one log line with `obsidian append file=log content="## [YYYY-MM-DD] ingest | ..."`. Include `proposed: <paths>` when the ingest stops at proposals.
+11. Before proposing or creating a concept, theorem, or idea page, run `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"`, `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"`, or `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"`.
+12. When the duplicate check returns a strong candidate, resolve the target page first. Continue through the update path or get user approval for a new page.
+13. Process approved knowledge pages one at a time. Finish the full post-processing checklist for the current page before starting the next new page.
+14. Use `./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py` when you need metadata support from Semantic Scholar.
+15. Maintain semantic relation properties with `obsidian property:set file=<slug> name=<relation_field> value="[[target-slug]]"` for single relation targets. For multi-target relation fields, update the frontmatter list and verify with `obsidian property:read`.
+16. Mirror every stable relation property in `## Relations` with a short evidence sentence.
+17. Complete the reverse update immediately after writing the page:
+   - add or confirm `key_sources`
+   - add the reverse source mention or related-page mention in body text or a related section
+   - confirm the source or related page points back to the new page when that page type expects a reverse update
+18. Use `wiki/bases/Semantic Relations.base#Relation review` as the review surface for pages with empty relation fields.
+19. Verify discoverability with `obsidian search query="<new concept or source title>" path=wiki` and `obsidian search:context query="<new concept or source title>" path=wiki`.
+20. Append one log line with `obsidian append file=log content="## [YYYY-MM-DD] ingest | ..."`. Include `proposed: <paths>` when the ingest stops at proposals.
+21. Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json` as the completion signal after page creation or update.
 
 ## Constraints
 
@@ -83,6 +91,8 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 - Use `relation_*` properties for machine-searchable semantic edges and `## Relations` for human-readable evidence.
 - Treat the six listed `relation_*` fields as the frozen relation contract.
 - Use Bases for relation browsing, filtering, and manual review.
+- Finish one new page completely before moving to the next new page in the same turn.
+- Treat lint-clean completion as the end of the page post-processing path.
 - Use `obsidian create path=... template=...` for new wiki pages when the template exists.
 - Use `obsidian property:set` for scalar properties and single relation targets.
 - Use wikilinks only for existing pages or user-approved new pages.
