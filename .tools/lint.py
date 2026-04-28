@@ -10,11 +10,11 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from _schemas import BASE_FILE_TEMPLATES, ENTITY_DIRS, FIELD_DEFAULTS, INDEXED_DIRS, RELATION_FIELDS, REQUIRED_FIELDS, VALID_VALUES
+from _schemas import FIELD_DEFAULTS, INDEXED_DIRS, RELATION_FIELDS, REQUIRED_FIELDS, VALID_VALUES
 from _frontmatter import FRONTMATTER_RE, parse_frontmatter, parse_scalar as _parse_scalar, serialize_frontmatter as _serialize_frontmatter
+from _support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
 
 WIKILINK_RE = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
-LOG_TEMPLATE = "# Vicky Log\n\n"
 
 
 class LintIssue:
@@ -51,11 +51,6 @@ class FixResult:
 
 def extract_frontmatter(content: str) -> dict:
     return parse_frontmatter(content)
-
-
-def extract_frontmatter_value(content: str, field: str):
-    frontmatter = extract_frontmatter(content)
-    return frontmatter.get(field)
 
 
 def _collect_pages(wiki_dir: Path) -> tuple[dict[str, Path], dict[str, list[Path]]]:
@@ -100,7 +95,9 @@ def check_support_files(wiki_dir: Path) -> list[LintIssue]:
             "message": "Support file does not match the current wiki log template",
         },
     }
-    for filename, template in BASE_FILE_TEMPLATES.items():
+    for filename, template in SUPPORT_FILE_TEMPLATES.items():
+        if filename == "log.md":
+            continue
         support_specs[filename] = {
             "template": template,
             "validators": [
@@ -391,16 +388,9 @@ def _fix_xref(wiki_dir: Path, issue: LintIssue) -> FixResult | None:
 
 
 def _fix_support_file(wiki_dir: Path, issue: LintIssue) -> FixResult | None:
-    templates = {
-        "log.md": LOG_TEMPLATE,
-        **BASE_FILE_TEMPLATES,
-    }
-    template = templates.get(issue.file)
-    if template is None:
+    if issue.file not in SUPPORT_FILE_TEMPLATES:
         return None
-    support_path = wiki_dir / issue.file
-    support_path.parent.mkdir(parents=True, exist_ok=True)
-    support_path.write_text(template, encoding="utf-8")
+    write_support_file(wiki_dir, issue.file, overwrite=True)
     return FixResult(issue.file, "Rewrite from canonical template")
 
 

@@ -9,12 +9,10 @@ import shutil
 import sys
 from pathlib import Path
 
-from _schemas import BASE_FILE_TEMPLATES, ENTITY_DIRS, INDEXED_DIRS, RAW_DIRS, SUPPORT_DIRS
+from _schemas import INDEXED_DIRS, RAW_DIRS, SUPPORT_DIRS
+from _support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
 
-OUTPUT_DIRS = ["outputs"]
 ALL_SCOPES = ["wiki", "raw", "log", "checkpoints"]
-
-LOG_TEMPLATE = "# Vicky Log\n\n"
 
 
 def _list_md(directory: Path) -> list[Path]:
@@ -43,7 +41,7 @@ def plan(project_root: Path, scopes: list[str]) -> dict:
         for support_dir in SUPPORT_DIRS:
             for file_path in _list_entries(wiki / support_dir):
                 data["delete_files"].append(str(file_path.relative_to(project_root)))
-        data["reset_files"].extend(f"wiki/{relative_path}" for relative_path in BASE_FILE_TEMPLATES)
+        data["reset_files"].extend(f"wiki/{relative_path}" for relative_path in SUPPORT_FILE_TEMPLATES if relative_path != "log.md")
 
     if "raw" in scopes:
         for subdir in RAW_DIRS:
@@ -89,11 +87,11 @@ def execute(project_root: Path, scopes: list[str]) -> dict:
                     entry.unlink()
                 deleted += 1
             directory.mkdir(parents=True, exist_ok=True)
-        for relative_path, content in BASE_FILE_TEMPLATES.items():
-            base_path = wiki / relative_path
-            base_path.parent.mkdir(parents=True, exist_ok=True)
-            base_path.write_text(content, encoding="utf-8")
-        reset += 1 + len(BASE_FILE_TEMPLATES)
+        for relative_path in SUPPORT_FILE_TEMPLATES:
+            if relative_path == "log.md":
+                continue
+            write_support_file(wiki, relative_path, overwrite=True)
+        reset += len(SUPPORT_FILE_TEMPLATES)
 
     if "raw" in scopes:
         for subdir in RAW_DIRS:

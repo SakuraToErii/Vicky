@@ -31,6 +31,6 @@ Run the vault health checks.
 - Default mode is report-only.
 - `--fix` should stay limited to deterministic repairs.
 - Relation fields are semantic graph edges. Every relation property should point at an existing page and have a matching `## Relations` explanation.
-- The six `relation_*` fields are a frozen schema. Add a new relation field only after proving the existing six fields cannot express the relation.
+- Follow `.docs/semantic-relations.en.md` for the frozen relation field contract.
 - Default Bases are support files for semantic relation review.
 - Obsidian CLI diagnostics are the first pass; `.tools/lint.py` is the strict rule pass.

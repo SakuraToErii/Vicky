@@ -30,7 +30,7 @@ def test_relation_schema_is_frozen():
 def wiki_dir(tmp_path):
     for name in lint_mod.INDEXED_DIRS:
         (tmp_path / name).mkdir()
-    for relative_path, content in lint_mod.BASE_FILE_TEMPLATES.items():
+    for relative_path, content in schema_mod.BASE_FILE_TEMPLATES.items():
         path = tmp_path / relative_path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
@@ -93,14 +93,14 @@ class TestSupportFiles:
         assert (wiki_dir / "log.md").read_text(encoding="utf-8") == lint_mod.LOG_TEMPLATE
 
     def test_missing_base_support_file_detected_and_fixed(self, wiki_dir):
-        missing_base = next(iter(lint_mod.BASE_FILE_TEMPLATES))
+        missing_base = next(iter(schema_mod.BASE_FILE_TEMPLATES))
         (wiki_dir / missing_base).unlink()
         issues = lint_mod.run_lint(wiki_dir)
         assert any(issue.file == missing_base for issue in issues)
 
         fixes = lint_mod.apply_fixes(wiki_dir, issues, dry_run=False)
         assert any(fix.file == missing_base for fix in fixes)
-        assert (wiki_dir / missing_base).read_text(encoding="utf-8") == lint_mod.BASE_FILE_TEMPLATES[missing_base]
+        assert (wiki_dir / missing_base).read_text(encoding="utf-8") == schema_mod.BASE_FILE_TEMPLATES[missing_base]
 
     def test_duplicate_slug_detected(self, wiki_dir):
         _write_page(

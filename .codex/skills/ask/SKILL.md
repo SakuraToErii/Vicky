@@ -23,6 +23,7 @@ Query the maintained wiki.
 - `../init/references/wiki-bootstrap-templates.md` for the output template name
 - `templates/Wiki_Output.md`
 - `wiki/bases/Semantic Relations.base` for the maintained relation workbench
+- `.docs/semantic-relations.en.md` for relation field rules
 
 ## Workflow
 
@@ -51,6 +52,6 @@ Query the maintained wiki.
 - Preserve useful analyses by saving them into `wiki/outputs/`.
 - Prefer Obsidian CLI for retrieval and page reads.
 - Treat Bases as relation map metadata for retrieval planning.
-- Treat the six `relation_*` fields as a frozen schema during retrieval and saved output creation.
+- Follow `.docs/semantic-relations.en.md` for the frozen relation field contract.
 - Use `file=<slug>` for existing notes and `path=` for ambiguous slugs or exact destinations.
 - Keep link expansion to one hop unless the user explicitly asks for a broader map.

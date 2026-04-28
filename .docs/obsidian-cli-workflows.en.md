@@ -38,7 +38,7 @@ Obsidian Bases live in `wiki/bases/`:
 
 Bases read the same Markdown properties that Obsidian CLI writes with `obsidian property:set`. Use the CLI for reliable property writes and use Bases for browsing, filtering, sorting, and manual edits in Obsidian.
 
-The six `relation_*` fields are a frozen schema. Add a new relation field only after proving the existing six fields cannot express the relation.
+Use `.docs/semantic-relations.en.md` for the canonical relation field list, value format, and frozen schema rule.
 
 ## Property Notes
 

@@ -32,6 +32,7 @@ Open `.codex/skills/ingest/references/wiki-update-templates.md` for ingest-time 
 Open `.docs/obsidian-cli-workflows.en.md` for the default vault command set.
 Open `.docs/runtime-page-templates.en.md` and `.docs/runtime-support-files.en.md` for concise summaries.
 Open `.docs/obsidian-bases-semantic-graph.en.md` for the Bases relation workflow.
+Open `.docs/semantic-relations.en.md` for the canonical relation field contract.
 
 ## Page types
 
@@ -66,31 +67,15 @@ During ingest, create the source page automatically. Create or update non-source
 
 ## Semantic relations
 
-Use relation properties for machine-searchable semantic edges:
+Follow `.docs/semantic-relations.en.md` for the canonical relation field list, frozen schema rule, Base workbenches, and retrieval contract.
 
-- `relation_derived_from`
-- `relation_extends`
-- `relation_supports`
-- `relation_contradicts`
-- `relation_uses`
-- `relation_compares_with`
+Use relation properties for machine-searchable edges and mirror every stable relation property in a `## Relations` body section with a short explanation. Properties are the graph index. `## Relations` is the evidence context.
 
-Use Obsidian wikilink strings as values:
-
-```yaml
-relation_derived_from:
-  - "[[source-paper-a]]"
-```
-
-The six relation fields are a frozen schema. Add a new `relation_*` field only after proving the existing six fields cannot express the relation.
-
-Mirror every stable relation property in a `## Relations` body section with a short explanation. Properties are the graph index; `## Relations` is the evidence context.
-
-## Bases, index, and log
+## Bases and log
 
 `wiki/bases/Semantic Relations.base` is the primary human-facing workbench for semantic relations. It shows all wiki pages with page type, source links, relation fields, relation counts, and a relation-review queue.
 
-`wiki/bases/Current Page Neighbors.base` is an embeddable neighborhood view. Embed it with `![[Current Page Neighbors.base#Semantic neighbors]]` when a page needs a local relation panel.
+`wiki/bases/Current Page Neighbors.base` is the local neighborhood panel described in `.docs/semantic-relations.en.md`.
 
 Use Obsidian CLI search, context search, properties, links, backlinks, and outlines as the machine retrieval path.
 

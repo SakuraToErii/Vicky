@@ -10,6 +10,7 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TOOLS_DIR = PROJECT_ROOT / ".tools"
 sys.path.insert(0, str(TOOLS_DIR))
+import _schemas as schema_mod
 import reset_wiki as rw
 
 
@@ -19,9 +20,9 @@ def project(tmp_path):
     for name in rw.INDEXED_DIRS:
         (wiki / name).mkdir(parents=True)
         (wiki / name / ".gitkeep").touch()
-    for name in rw.SUPPORT_DIRS:
+    for name in schema_mod.SUPPORT_DIRS:
         (wiki / name).mkdir(parents=True)
-    for relative_path, content in rw.BASE_FILE_TEMPLATES.items():
+    for relative_path, content in schema_mod.BASE_FILE_TEMPLATES.items():
         (wiki / relative_path).write_text(content + "\n# local edit\n", encoding="utf-8")
     (wiki / "sources" / "paper-a.md").write_text("---\ntitle: Paper A\n---\n", encoding="utf-8")
     (wiki / "outputs" / "comparison.md").write_text("# comparison\n", encoding="utf-8")
@@ -42,7 +43,7 @@ def test_plan_lists_wiki_content(project):
     assert "wiki/sources/paper-a.md" in deletes
     assert "wiki/outputs/comparison.md" in deletes
     assert "wiki/log.md" in deletes
-    for relative_path in rw.BASE_FILE_TEMPLATES:
+    for relative_path in schema_mod.BASE_FILE_TEMPLATES:
         assert f"wiki/{relative_path}" in deletes
         assert f"wiki/{relative_path}" in payload["reset_files"]
     assert "wiki/log.md" in payload["reset_files"]
@@ -55,9 +56,9 @@ def test_execute_wiki_removes_pages_and_keeps_gitkeep(project):
     assert (project / "wiki" / "sources" / ".gitkeep").exists()
     assert not (project / "wiki" / "index.md").exists()
     assert (project / "wiki" / "log.md").read_text(encoding="utf-8") == rw.LOG_TEMPLATE
-    for relative_path, content in rw.BASE_FILE_TEMPLATES.items():
+    for relative_path, content in schema_mod.BASE_FILE_TEMPLATES.items():
         assert (project / "wiki" / relative_path).read_text(encoding="utf-8") == content
-    assert result["reset_files"] == 1 + len(rw.BASE_FILE_TEMPLATES)
+    assert result["reset_files"] == 1 + len(schema_mod.BASE_FILE_TEMPLATES)
 
 
 def test_execute_raw_removes_inbox_and_papers(project):

@@ -29,6 +29,6 @@ Apply a targeted vault edit.
 - Treat `raw/` as user-owned input.
 - Keep edits scoped to the pages the user asked for.
 - Keep relation properties visible in the semantic Bases workbench.
-- Keep the six `relation_*` fields stable as a frozen schema.
+- Follow `.docs/semantic-relations.en.md` for relation field stability rules.
 - Prefer `file=<slug>` for existing notes and `path=` for exact destinations.
 - Prefer Obsidian CLI for reads, property edits, appends, prepends, renames, and moves.

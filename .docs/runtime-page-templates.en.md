@@ -32,25 +32,12 @@ Use this page as a compact index:
 - `topics/{slug}.md`: overview, core concepts, sources, theorems, people, open questions
 - `outputs/{slug}.md`: question, answer, relations, sources used, follow-up
 
-Semantic relation fields:
-
-- `relation_derived_from`
-- `relation_extends`
-- `relation_supports`
-- `relation_contradicts`
-- `relation_uses`
-- `relation_compares_with`
-
-These six fields are a frozen schema. Add a new `relation_*` field only after proving the existing six fields cannot express the relation.
+Follow `.docs/semantic-relations.en.md` for the canonical relation field list and frozen schema rule.
 
 Each relation value should be an Obsidian wikilink string. Mirror every stable relation in a `## Relations` bullet with a short explanation. Use relation fields on generated wiki pages that keep a `## Relations` section, including saved outputs.
 
 Open `wiki/bases/Semantic Relations.base` after writing relation properties. Use the `Relation review` view to find pages that need semantic edges and the grouped table views to inspect cross-page connections.
 
-Embed `wiki/bases/Current Page Neighbors.base` in a page when a local relation panel is useful:
-
-```markdown
-![[Current Page Neighbors.base#Semantic neighbors]]
-```
+Use `.docs/semantic-relations.en.md` for the local neighborhood embed pattern.
 
 Use `.docs/runtime-support-files.en.md` for the short explanation of `wiki/log.md` and `wiki/bases/*.base`.

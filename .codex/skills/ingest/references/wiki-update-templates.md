@@ -83,6 +83,8 @@ Use wikilinks only for existing pages or user-approved new pages.
 
 ## Relation schema
 
+Use `.docs/semantic-relations.en.md` as the canonical relation field contract.
+
 Relation properties are machine-searchable semantic edges. Use Obsidian wikilink strings as values:
 
 ```yaml
@@ -107,8 +109,6 @@ Mirror every stable relation property in the page body:
 ```
 
 Use relation properties as the graph index and `## Relations` as the evidence context.
-
-The six `relation_*` fields are a frozen schema. Add a new relation field only after proving the existing six fields cannot express the relation.
 
 After writing relation properties, use `wiki/bases/Semantic Relations.base` as the review table. The `Relation review` view surfaces pages whose semantic relation fields are empty, and the grouped views make cross-page edges easier to inspect before running strict lint.
 

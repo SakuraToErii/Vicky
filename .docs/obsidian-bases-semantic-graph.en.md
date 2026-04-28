@@ -1,6 +1,6 @@
 # Obsidian Bases Semantic Graph Workflow
 
-Bases give Vicky a visible workbench for the semantic graph. Each Markdown note is a row. Frontmatter properties are columns. The `relation_*` fields are the graph edges.
+Bases give Vicky a visible workbench for the semantic graph. Each Markdown note is a row. Frontmatter properties are columns. Use `.docs/semantic-relations.en.md` for the canonical relation field contract.
 
 ## What Bases Replace
 
@@ -13,28 +13,9 @@ Bases give Vicky a visible workbench for the semantic graph. Each Markdown note 
 
 ## What Stays Canonical
 
-The canonical graph data stays in Markdown frontmatter:
-
-```yaml
-relation_derived_from:
-  - "[[source-paper-a]]"
-relation_extends:
-  - "[[concept-b]]"
-relation_supports:
-  - "[[theorem-c]]"
-```
-
-The evidence stays in the page body:
-
-```markdown
-## Relations
-
-- Derived from [[source-paper-a]]: uses its proof setup and relaxes the boundedness assumption.
-```
+The canonical graph data stays in Markdown frontmatter, and the evidence stays in the page body under `## Relations`.
 
 `.tools/lint.py` checks that relation properties and `## Relations` explanations stay aligned.
-
-The six `relation_*` fields are a frozen schema. Add a new relation field only after proving the existing six fields cannot express the relation.
 
 ## Default Bases
 

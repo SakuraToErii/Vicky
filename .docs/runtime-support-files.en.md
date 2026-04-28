@@ -27,7 +27,7 @@ Its views cover:
 
 When embedded, it shows pages that point at the current note through `relation_*` properties or normal wikilinks.
 
-The six `relation_*` fields are a frozen schema. Add a new relation field only after proving the existing six fields cannot express the relation.
+Use `.docs/semantic-relations.en.md` for the canonical relation field list, evidence format, and frozen schema rule.
 
 ## Search-first retrieval
 

@@ -17,7 +17,8 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from _schemas import BASE_FILE_TEMPLATES, ENTITY_DIRS, FIELD_DEFAULTS, INDEXED_DIRS, SUPPORT_DIRS
+from _schemas import FIELD_DEFAULTS, INDEXED_DIRS
+from _support_files import LOG_TEMPLATE, ensure_support_files
 from _frontmatter import (
     FRONTMATTER_RE,
     parse_frontmatter_file as _parse_frontmatter,
@@ -74,27 +75,14 @@ def _today() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
-def _initial_log() -> str:
-    return "# Vicky Log\n\n"
-
-
 def init_wiki(wiki_root: str) -> None:
     """Create the wiki directory scaffold."""
     root = Path(wiki_root)
     for name in INDEXED_DIRS:
         (root / name).mkdir(parents=True, exist_ok=True)
-    for name in SUPPORT_DIRS:
-        (root / name).mkdir(parents=True, exist_ok=True)
-    _write_if_missing(root / "log.md", _initial_log())
-    for relative_path, content in BASE_FILE_TEMPLATES.items():
-        _write_if_missing(root / relative_path, content)
+    ensure_support_files(root, missing_only=True)
     append_log(wiki_root, "init | wiki initialized")
     print(json.dumps({"status": "ok", "wiki_root": str(root)}))
-
-
-def _write_if_missing(path: Path, content: str) -> None:
-    if not path.exists():
-        path.write_text(content, encoding="utf-8")
 
 
 def append_log(wiki_root: str, message: str) -> None:
@@ -104,7 +92,7 @@ def append_log(wiki_root: str, message: str) -> None:
         with open(log_path, "a", encoding="utf-8") as handle:
             handle.write(entry)
     else:
-        log_path.write_text(_initial_log() + entry, encoding="utf-8")
+        log_path.write_text(LOG_TEMPLATE + entry, encoding="utf-8")
 
 
 def read_meta(path: str, field: str | None = None) -> None:

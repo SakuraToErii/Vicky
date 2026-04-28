@@ -1,9 +1,4 @@
-"""Single source of truth for the Vicky wiki schema.
-
-The repository is now an Obsidian-first LLM wiki for shared human/AI note
-maintenance. Raw sources stay under ``raw/``. Structured knowledge lives under
-``wiki/``.
-"""
+"""Single source of truth for the Vicky wiki schema."""
 
 from __future__ import annotations
 
@@ -24,6 +19,11 @@ RAW_DIRS = ["papers", "web", "inbox"]
 BASES_DIR = "bases"
 SUPPORT_DIRS = [BASES_DIR]
 
+WIKI_PAGE_FOLDERS = [f"wiki/{name}" for name in INDEXED_DIRS]
+KNOWLEDGE_PAGE_FOLDERS = [folder for folder in WIKI_PAGE_FOLDERS if folder != "wiki/sources"]
+FORMAL_PAGE_FOLDERS = [f"wiki/{name}" for name in ("concepts", "theorems", "foundations")]
+SYNTHESIS_PAGE_FOLDERS = [f"wiki/{name}" for name in ("ideas", "topics", "outputs")]
+
 # Frozen semantic relation schema.
 RELATION_SCHEMA_STATUS = "frozen"
 RELATION_SCHEMA_CHANGE_POLICY = "New relation fields require proof that the six existing fields cannot express the relation."
@@ -35,6 +35,14 @@ RELATION_FIELDS = [
     "relation_uses",
     "relation_compares_with",
 ]
+RELATION_DISPLAY_NAMES = {
+    "relation_derived_from": "Derived from",
+    "relation_extends": "Extends",
+    "relation_supports": "Supports",
+    "relation_contradicts": "Contradicts",
+    "relation_uses": "Uses",
+    "relation_compares_with": "Compares with",
+}
 
 REQUIRED_FIELDS = {
     "sources": ["title", "slug", "source_kind", "source_path"],
@@ -76,24 +84,68 @@ FIELD_DEFAULTS = {
     "foundations": {"status": "canonical"},
 }
 
-SEMANTIC_RELATIONS_BASE = """filters:
+PAGE_TYPE_FORMULA = 'file.folder.replace("wiki/", "")'
+DISPLAY_TITLE_FORMULA = "if(title, title, if(name, name, file.basename))"
+
+
+def _folder_lines(folders: list[str], indent: str = "        ") -> str:
+    return "\n".join(f"{indent}- 'file.inFolder(\"{folder}\")'" for folder in folders)
+
+
+def _relation_order_lines(indent: str = "      ", fields: list[str] | None = None) -> str:
+    active_fields = fields or RELATION_FIELDS
+    return "\n".join(f"{indent}- {field}" for field in active_fields)
+
+
+def _relation_property_lines(indent: str = "  ") -> str:
+    lines = []
+    for field in RELATION_FIELDS:
+        label = RELATION_DISPLAY_NAMES[field]
+        lines.append(f"{indent}{field}:")
+        lines.append(f"{indent}  displayName: {label}")
+    return "\n".join(lines)
+
+
+def _relation_count_formula() -> str:
+    terms = []
+    for field in RELATION_FIELDS:
+        terms.append(f'if(file.hasProperty("{field}"), list({field}).length, 0)')
+    return " + ".join(terms)
+
+
+def _relation_alias(field: str) -> str:
+    return field.removeprefix("relation_")
+
+
+def _knowledge_folder_predicate() -> str:
+    return " || ".join(f'file.inFolder("{folder}")' for folder in KNOWLEDGE_PAGE_FOLDERS)
+
+
+def _current_edge_formula_lines() -> str:
+    lines = []
+    for field in RELATION_FIELDS:
+        alias = _relation_alias(field)
+        lines.append(
+            f'  {alias}_current: \'if(file.hasProperty("{field}"), list({field}).contains(this.file), false)\''
+        )
+    return "\n".join(lines)
+
+
+def _current_edge_predicate() -> str:
+    return " || ".join(f"formula.{_relation_alias(field)}_current" for field in RELATION_FIELDS)
+
+
+SEMANTIC_RELATIONS_BASE = f"""filters:
   and:
     - 'file.ext == "md"'
     - or:
-        - 'file.inFolder("wiki/sources")'
-        - 'file.inFolder("wiki/concepts")'
-        - 'file.inFolder("wiki/theorems")'
-        - 'file.inFolder("wiki/foundations")'
-        - 'file.inFolder("wiki/people")'
-        - 'file.inFolder("wiki/ideas")'
-        - 'file.inFolder("wiki/topics")'
-        - 'file.inFolder("wiki/outputs")'
+{_folder_lines(WIKI_PAGE_FOLDERS)}
 formulas:
-  page_type: 'file.folder.replace("wiki/", "")'
-  display_title: 'if(title, title, if(name, name, file.basename))'
-  relation_count: 'if(file.hasProperty("relation_derived_from"), list(relation_derived_from).length, 0) + if(file.hasProperty("relation_extends"), list(relation_extends).length, 0) + if(file.hasProperty("relation_supports"), list(relation_supports).length, 0) + if(file.hasProperty("relation_contradicts"), list(relation_contradicts).length, 0) + if(file.hasProperty("relation_uses"), list(relation_uses).length, 0) + if(file.hasProperty("relation_compares_with"), list(relation_compares_with).length, 0)'
+  page_type: '{PAGE_TYPE_FORMULA}'
+  display_title: '{DISPLAY_TITLE_FORMULA}'
+  relation_count: '{_relation_count_formula()}'
   source_count: 'if(file.hasProperty("key_sources"), list(key_sources).length, 0)'
-  needs_relation_review: 'formula.relation_count == 0 && (file.inFolder("wiki/concepts") || file.inFolder("wiki/theorems") || file.inFolder("wiki/foundations") || file.inFolder("wiki/people") || file.inFolder("wiki/ideas") || file.inFolder("wiki/topics") || file.inFolder("wiki/outputs"))'
+  needs_relation_review: 'formula.relation_count == 0 && ({_knowledge_folder_predicate()})'
 properties:
   formula.display_title:
     displayName: Title
@@ -107,18 +159,7 @@ properties:
     displayName: Needs relation review
   key_sources:
     displayName: Key sources
-  relation_derived_from:
-    displayName: Derived from
-  relation_extends:
-    displayName: Extends
-  relation_supports:
-    displayName: Supports
-  relation_contradicts:
-    displayName: Contradicts
-  relation_uses:
-    displayName: Uses
-  relation_compares_with:
-    displayName: Compares with
+{_relation_property_lines()}
 views:
   - type: table
     name: Semantic graph
@@ -134,12 +175,7 @@ views:
       - status
       - theorem_kind
       - key_sources
-      - relation_derived_from
-      - relation_extends
-      - relation_supports
-      - relation_contradicts
-      - relation_uses
-      - relation_compares_with
+{_relation_order_lines()}
       - formula.relation_count
     summaries:
       formula.relation_count: Sum
@@ -177,9 +213,7 @@ views:
     name: Concepts and theorems
     filters:
       or:
-        - 'file.inFolder("wiki/concepts")'
-        - 'file.inFolder("wiki/theorems")'
-        - 'file.inFolder("wiki/foundations")'
+{_folder_lines(FORMAL_PAGE_FOLDERS)}
     groupBy:
       property: formula.page_type
       direction: ASC
@@ -189,19 +223,13 @@ views:
       - maturity
       - status
       - key_sources
-      - relation_derived_from
-      - relation_extends
-      - relation_supports
-      - relation_uses
-      - relation_compares_with
+{_relation_order_lines(fields=["relation_derived_from", "relation_extends", "relation_supports", "relation_uses", "relation_compares_with"])}
       - formula.relation_count
   - type: table
     name: Ideas and outputs
     filters:
       or:
-        - 'file.inFolder("wiki/ideas")'
-        - 'file.inFolder("wiki/topics")'
-        - 'file.inFolder("wiki/outputs")'
+{_folder_lines(SYNTHESIS_PAGE_FOLDERS)}
     groupBy:
       property: formula.page_type
       direction: ASC
@@ -210,36 +238,22 @@ views:
       - status
       - priority
       - tags
-      - relation_derived_from
-      - relation_supports
-      - relation_compares_with
+{_relation_order_lines(fields=["relation_derived_from", "relation_supports", "relation_compares_with"])}
       - formula.relation_count
 """
 
-CURRENT_PAGE_NEIGHBORS_BASE = """filters:
+CURRENT_PAGE_NEIGHBORS_BASE = f"""filters:
   and:
     - 'file.ext == "md"'
     - 'file.path != this.file.path'
     - or:
-        - 'file.inFolder("wiki/sources")'
-        - 'file.inFolder("wiki/concepts")'
-        - 'file.inFolder("wiki/theorems")'
-        - 'file.inFolder("wiki/foundations")'
-        - 'file.inFolder("wiki/people")'
-        - 'file.inFolder("wiki/ideas")'
-        - 'file.inFolder("wiki/topics")'
-        - 'file.inFolder("wiki/outputs")'
+{_folder_lines(WIKI_PAGE_FOLDERS)}
 formulas:
-  page_type: 'file.folder.replace("wiki/", "")'
-  display_title: 'if(title, title, if(name, name, file.basename))'
+  page_type: '{PAGE_TYPE_FORMULA}'
+  display_title: '{DISPLAY_TITLE_FORMULA}'
   mentions_current: 'file.hasLink(this.file)'
-  derived_from_current: 'if(file.hasProperty("relation_derived_from"), list(relation_derived_from).contains(this.file), false)'
-  extends_current: 'if(file.hasProperty("relation_extends"), list(relation_extends).contains(this.file), false)'
-  supports_current: 'if(file.hasProperty("relation_supports"), list(relation_supports).contains(this.file), false)'
-  contradicts_current: 'if(file.hasProperty("relation_contradicts"), list(relation_contradicts).contains(this.file), false)'
-  uses_current: 'if(file.hasProperty("relation_uses"), list(relation_uses).contains(this.file), false)'
-  compares_with_current: 'if(file.hasProperty("relation_compares_with"), list(relation_compares_with).contains(this.file), false)'
-  semantic_edge_to_current: 'formula.derived_from_current || formula.extends_current || formula.supports_current || formula.contradicts_current || formula.uses_current || formula.compares_with_current'
+{_current_edge_formula_lines()}
+  semantic_edge_to_current: '{_current_edge_predicate()}'
   incoming_reason: 'if(formula.semantic_edge_to_current, "semantic property", if(formula.mentions_current, "wikilink", ""))'
 properties:
   formula.display_title:
@@ -252,18 +266,7 @@ properties:
     displayName: Semantic edge
   formula.mentions_current:
     displayName: Mentions current page
-  relation_derived_from:
-    displayName: Derived from
-  relation_extends:
-    displayName: Extends
-  relation_supports:
-    displayName: Supports
-  relation_contradicts:
-    displayName: Contradicts
-  relation_uses:
-    displayName: Uses
-  relation_compares_with:
-    displayName: Compares with
+{_relation_property_lines()}
 views:
   - type: table
     name: Semantic neighbors
@@ -279,12 +282,7 @@ views:
       - file.path
       - formula.page_type
       - formula.incoming_reason
-      - relation_derived_from
-      - relation_extends
-      - relation_supports
-      - relation_contradicts
-      - relation_uses
-      - relation_compares_with
+{_relation_order_lines()}
   - type: table
     name: Relation-only
     filters:
@@ -296,12 +294,7 @@ views:
     order:
       - formula.display_title
       - file.path
-      - relation_derived_from
-      - relation_extends
-      - relation_supports
-      - relation_contradicts
-      - relation_uses
-      - relation_compares_with
+{_relation_order_lines()}
   - type: table
     name: Mentions
     filters:

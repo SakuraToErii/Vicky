@@ -1,5 +1,7 @@
 # Ask Search-First Without `index.md`
 
+Historical migration note for the shift from `wiki/index.md` to search-first retrieval.
+
 ## Goal
 
 Remove `wiki/index.md` as a maintained support file and make `ask` retrieval start from Obsidian CLI search plus semantic relation expansion.
@@ -11,7 +13,7 @@ The vault already has two stronger entry points:
 - Obsidian CLI for machine retrieval: `search`, `search:context`, `property:read`, `links`, `backlinks`, and `outline`.
 - Obsidian Bases for human browsing and relation review.
 
-`wiki/index.md` duplicates metadata that can be discovered from Markdown files and properties.
+`wiki/index.md` duplicated metadata that can be discovered from Markdown files and properties.
 
 ## Implementation Checklist
 

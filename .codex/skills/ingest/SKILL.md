@@ -28,6 +28,7 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 
 - `references/wiki-update-templates.md`
 - `templates/`
+- `.docs/semantic-relations.en.md`
 
 ## Workflow
 
@@ -57,7 +58,7 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 - Create or update non-source knowledge pages only when the user has named the target or approved the proposal.
 - Maintain backlinks from approved concepts, theorems, and people through `key_sources`.
 - Use `relation_*` properties for machine-searchable semantic edges and `## Relations` for human-readable evidence.
-- Treat the six `relation_*` fields as a frozen schema. Add a new relation field only after proving the existing six fields cannot express the relation.
+- Follow `.docs/semantic-relations.en.md` for the frozen relation field contract.
 - Use Bases for relation browsing, filtering, and manual review.
 - Use `obsidian create path=... template=...` for new wiki pages when the template exists.
 - Use `obsidian property:set` for scalar properties and single relation targets.

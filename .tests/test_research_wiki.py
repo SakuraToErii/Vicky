@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / ".tools"))
+import _schemas as schema_mod
 import research_wiki as rw
 
 
@@ -40,9 +41,9 @@ class TestInitWiki:
         rw.init_wiki(str(wiki))
         for name in rw.INDEXED_DIRS:
             assert (wiki / name).is_dir()
-        for name in rw.SUPPORT_DIRS:
+        for name in schema_mod.SUPPORT_DIRS:
             assert (wiki / name).is_dir()
-        for relative_path in rw.BASE_FILE_TEMPLATES:
+        for relative_path in schema_mod.BASE_FILE_TEMPLATES:
             assert (wiki / relative_path).exists()
         assert not (wiki / "index.md").exists()
         assert (wiki / "log.md").exists()

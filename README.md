@@ -2,7 +2,7 @@
 
 An Obsidian-first LLM wiki for reading papers, blogs, and technical notes with a persistent Markdown knowledge base.
 
-Vicky turns source material in `raw/` into structured notes in `wiki/`. Obsidian is the browsing and editing surface. Codex skills and local tools maintain the schema, semantic relations, logs, indexes, and checks.
+Vicky turns source material in `raw/` into structured notes in `wiki/`. Obsidian is the browsing and editing surface. Codex skills and local tools maintain the schema, semantic relations, logs, support files, and checks.
 
 ## Repository Layout
 
@@ -48,35 +48,9 @@ Engineering support directories stay hidden at the vault root: `.docs/`, `.tools
 
 ## Semantic Graph
 
-Semantic edges live in Markdown properties:
+Semantic edges live in Markdown properties and stay aligned with `## Relations` evidence blocks.
 
-```yaml
-relation_derived_from:
-  - "[[source-paper-a]]"
-relation_extends:
-  - "[[concept-b]]"
-```
-
-The six relation fields are a frozen schema:
-
-- `relation_derived_from`
-- `relation_extends`
-- `relation_supports`
-- `relation_contradicts`
-- `relation_uses`
-- `relation_compares_with`
-
-Add a new relation field only after proving the existing six fields cannot express the relation.
-
-`wiki/bases/Semantic Relations.base` is the main semantic relation workbench. Use it to scan pages, filter missing relations, group by page type, and review relation fields.
-
-`wiki/bases/Current Page Neighbors.base` is a local context panel. Embed it in a note with:
-
-```markdown
-![[Current Page Neighbors.base#Semantic neighbors]]
-```
-
-`ask` retrieval starts from Obsidian CLI search, then expands candidates through relation properties, links, backlinks, properties, and outlines. Bases remain the human-facing relation workbench.
+The canonical relation contract lives in [.docs/semantic-relations.en.md](/Users/ordis/Desktop/Vicky/.docs/semantic-relations.en.md:1). It defines the six frozen `relation_*` fields, the frontmatter format, the Bases workbenches, and the search-first retrieval path.
 
 ## Setup
 
