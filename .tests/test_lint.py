@@ -146,6 +146,13 @@ class TestSupportFiles:
         issues = lint_mod.run_lint(wiki_dir)
         assert not any(issue.file == base_name and issue.category == "support-file" for issue in issues)
 
+    def test_base_support_file_allows_unquoted_yaml_scalars(self, wiki_dir):
+        base_name = next(iter(schema_mod.BASE_FILE_TEMPLATES))
+        base_path = wiki_dir / base_name
+        base_path.write_text(schema_mod.BASE_FILE_TEMPLATES[base_name].replace("'", ""), encoding="utf-8")
+        issues = lint_mod.run_lint(wiki_dir)
+        assert not any(issue.file == base_name and issue.category == "support-file" for issue in issues)
+
     def test_duplicate_slug_detected(self, wiki_dir):
         _write_page(
             wiki_dir,

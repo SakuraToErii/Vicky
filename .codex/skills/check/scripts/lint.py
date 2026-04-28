@@ -10,6 +10,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+import yaml
+
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
 if str(LIB_DIR) not in sys.path:
@@ -142,18 +144,29 @@ def _normalized_nonempty_lines(content: str) -> list[str]:
 
 
 def _contains_canonical_template(content: str, template: str) -> bool:
-    template_lines = _normalized_nonempty_lines(template)
-    if not template_lines:
+    try:
+        expected = yaml.safe_load(template)
+        actual = yaml.safe_load(content)
+    except yaml.YAMLError:
+        return False
+    return _yaml_contains(actual, expected)
+
+
+def _yaml_contains(actual, expected) -> bool:
+    if isinstance(expected, dict):
+        if not isinstance(actual, dict):
+            return False
+        for key, expected_value in expected.items():
+            if key not in actual:
+                return False
+            if not _yaml_contains(actual[key], expected_value):
+                return False
         return True
-    content_lines = _normalized_nonempty_lines(content)
-    index = 0
-    for line in content_lines:
-        if line != template_lines[index]:
-            continue
-        index += 1
-        if index == len(template_lines):
-            return True
-    return False
+    if isinstance(expected, list):
+        if not isinstance(actual, list) or len(actual) != len(expected):
+            return False
+        return all(_yaml_contains(actual_item, expected_item) for actual_item, expected_item in zip(actual, expected))
+    return actual == expected
 
 
 def check_missing_fields(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIssue]:
