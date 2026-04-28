@@ -4,6 +4,8 @@ An Obsidian-first LLM wiki for reading papers, blogs, and technical notes with a
 
 Vicky turns source material in `raw/` into structured notes in `wiki/`. Obsidian is the browsing and editing surface. Codex skills and local tools maintain the schema, semantic relations, logs, support files, and checks.
 
+The name `Vicky` echoes `wiki` and gives the vault a human name. It reads as a familiar female given name in English and keeps the project memorable.
+
 ## Repository Layout
 
 ```text
@@ -113,15 +115,22 @@ Other useful skill scripts:
 .venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "Open Question"
 ```
 
-## Legacy CLI Mapping
+## Command Surface
 
-The old `.tools/research_wiki.py` surface is now split by skill: slug and near-duplicate checks live in `ingest/scripts/`, frontmatter lookup lives in `ask/scripts/`, reset lives in `reset/scripts/`, and graph diagnostics use Obsidian CLI plus Vicky path filters. Log appends, property reads, property writes, file listing, search, links, backlinks, outlines, renames, and moves use Obsidian CLI.
+- Obsidian CLI handles note reads, writes, property edits, search, links, backlinks, outlines, log appends, renames, and moves.
+- `ingest/scripts/` handles slugging, duplicate checks, and Semantic Scholar metadata.
+- `ask/scripts/` handles frontmatter lookup.
+- `check/scripts/` handles strict wiki lint.
+- `reset/scripts/` handles reset planning and reset execution.
 
 ## Obsidian Notes
 
 - Open the repository root as the Obsidian vault.
 - Obsidian Templates use `templates/`, configured in `.obsidian/templates.json`.
 - Obsidian Bases use `wiki/bases/`.
+- `wiki/bases/Semantic Relations.base` is the main semantic review table.
+- `wiki/bases/Current Page Neighbors.base` can be embedded inside notes for local graph context.
+- Embed the local graph panel with `![[Current Page Neighbors.base#Semantic neighbors]]`.
 - New wiki pages can be created with `obsidian create path="wiki/concepts/<slug>.md" template="Wiki_Concept"`.
 - Existing notes can usually be addressed by file name, such as `obsidian read file=<slug>` or `obsidian property:read file=<slug> name=title`.
 - The vault is plain Markdown, so git history stays readable.
