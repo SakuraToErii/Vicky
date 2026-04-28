@@ -55,7 +55,7 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 1. Resolve the local path exactly as given by the user.
 2. Run `obsidian templates` and confirm the `Wiki_*` templates are available.
 3. Read the source with `obsidian read path="<source-path>"` and extract title, source type, authors, year, and main ideas. Use a local text read for raw formats that Obsidian cannot read cleanly.
-4. Generate a lowercase hyphenated slug from the title with `./.venv/bin/python .codex/skills/init/scripts/slug.py "<title>"`.
+4. Generate a lowercase hyphenated slug from the title with `./.venv/bin/python .codex/skills/ingest/scripts/slug.py "<title>"`.
 5. Create a missing source page with `obsidian create path="wiki/sources/{slug}.md" template="Wiki_Source"`.
 6. Fill source frontmatter with `obsidian property:set file=<slug> name=<field> value=<value> type=<type>`. Keep `source_path` pointing at the raw file.
 7. Detect user intent for non-source knowledge pages:

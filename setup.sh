@@ -88,7 +88,7 @@ fi
 echo ""
 info "Verifying core imports..."
 
-if PYTHONPATH="$PROJECT_ROOT/.codex/lib:$PROJECT_ROOT/.codex/skills/check/scripts:$PROJECT_ROOT/.codex/skills/ingest/scripts:$PROJECT_ROOT/.codex/skills/reset/scripts:$PROJECT_ROOT/.codex/skills/init/scripts:$PROJECT_ROOT/.codex/skills/ask/scripts" "$VENV_PYTHON_ABS" -c "from vicky.schema import INDEXED_DIRS; from lint import run_lint; from wiki_graph import query_orphans; from fetch_s2 import search; from reset_wiki import plan; from init_wiki import init_wiki; from slug import slugify; from similar_pages import find_similar_concept; from frontmatter_find import find_entities" >/dev/null 2>&1; then
+if PYTHONPATH="$PROJECT_ROOT/.codex/lib:$PROJECT_ROOT/.codex/skills/check/scripts:$PROJECT_ROOT/.codex/skills/ingest/scripts:$PROJECT_ROOT/.codex/skills/reset/scripts:$PROJECT_ROOT/.codex/skills/ask/scripts" "$VENV_PYTHON_ABS" -c "from vicky.schema import INDEXED_DIRS; from lint import run_lint; from wiki_graph import query_orphans; from fetch_s2 import search; from reset_wiki import plan; from slug import slugify; from similar_pages import find_similar_concept; from frontmatter_find import find_entities" >/dev/null 2>&1; then
     ok "Core scripts import cleanly"
 else
     fail "Core script import failed"
@@ -102,5 +102,5 @@ echo "Next steps:"
 echo "  1. Put prepared sources in raw/papers/ or raw/web/"
 echo "  2. Open the repository root in Obsidian"
 echo "  3. Run: codex"
-echo "  4. Ask Codex to initialize the wiki or ingest a source from raw/"
+echo "  4. Ask Codex to ingest a source you choose from raw/"
 echo "  5. Use wiki/bases/Semantic Relations.base for semantic relation review"

@@ -156,7 +156,7 @@ Use Python for:
 - strict lint rules: `.codex/skills/check/scripts/lint.py`
 - repo-local wiki graph diagnostics: `.codex/skills/check/scripts/wiki_graph.py`
 - frontmatter lookup fallback: `.codex/skills/ask/scripts/frontmatter_find.py`
-- deterministic scaffold setup and slugging: `.codex/skills/init/scripts/init_wiki.py`, `.codex/skills/init/scripts/slug.py`
+- deterministic slugging: `.codex/skills/ingest/scripts/slug.py`
 - pre-create duplicate checks: `.codex/skills/ingest/scripts/similar_pages.py`
 - Semantic Scholar metadata: `.codex/skills/ingest/scripts/fetch_s2.py`
 - reset previews and guarded reset execution: `.codex/skills/reset/scripts/reset_wiki.py`
@@ -168,8 +168,8 @@ The old monolithic `.tools/research_wiki.py` command surface is split by skill o
 
 | Old command | Current owner |
 |---|---|
-| `init` | `.codex/skills/init/scripts/init_wiki.py` |
-| `slug` | `.codex/skills/init/scripts/slug.py` and `.codex/lib/vicky/slug.py` |
+| `init` | repository skeleton ships with GitHub checkout; setup and check verify the existing scaffold |
+| `slug` | `.codex/skills/ingest/scripts/slug.py` and `.codex/lib/vicky/slug.py` |
 | `find` | `.codex/skills/ask/scripts/frontmatter_find.py` |
 | `find-similar-concept` | `.codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"` |
 | `find-similar-theorem` | `.codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"` |
@@ -188,7 +188,6 @@ The old monolithic `.tools/research_wiki.py` command surface is split by skill o
 |---|---|
 | `setup` | `.codex/skills/setup/SKILL.md` |
 | `reset` | `.codex/skills/reset/SKILL.md` |
-| `init` | `.codex/skills/init/SKILL.md` |
 | `ingest` | `.codex/skills/ingest/SKILL.md` |
 | `edit` | `.codex/skills/edit/SKILL.md` |
 | `ask` | `.codex/skills/ask/SKILL.md` |
