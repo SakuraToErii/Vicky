@@ -64,7 +64,7 @@ fi
 
 info "Installing dependencies..."
 "$VENV_PYTHON" -m pip install --upgrade pip >/dev/null
-"$VENV_PYTHON" -m pip install -r requirements.txt >/dev/null
+"$VENV_PYTHON" -m pip install "requests>=2.28.0" "PyYAML>=6.0" >/dev/null
 ok "Dependencies installed"
 
 echo ""
