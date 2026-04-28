@@ -171,8 +171,8 @@ The old monolithic `.tools/research_wiki.py` command surface is split by skill o
 | `init` | `.codex/skills/init/scripts/init_wiki.py` |
 | `slug` | `.codex/skills/init/scripts/slug.py` and `.codex/lib/vicky/slug.py` |
 | `find` | `.codex/skills/ask/scripts/frontmatter_find.py` |
-| `find-similar-concept` | `.codex/skills/ingest/scripts/similar_pages.py concept` |
-| `find-similar-theorem` | `.codex/skills/ingest/scripts/similar_pages.py theorem` |
+| `find-similar-concept` | `.codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"` |
+| `find-similar-theorem` | `.codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"` |
 | `query orphans` / `query deadends` | `.codex/skills/check/scripts/wiki_graph.py` |
 | `log` | `obsidian append file=log content="..."` |
 | `read-meta` | `obsidian property:read file=<slug> name=<field>` |
