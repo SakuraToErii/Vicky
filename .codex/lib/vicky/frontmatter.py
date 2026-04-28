@@ -140,11 +140,12 @@ def serialize_frontmatter(frontmatter: dict) -> str:
             if not value:
                 lines.append(f"{key}: []")
             elif all(not isinstance(item, dict) for item in value):
-                rendered = ", ".join(
-                    f'"{item}"' if isinstance(item, str) and any(ch in item for ch in ":#,[]") else str(item)
-                    for item in value
-                )
-                lines.append(f"{key}: [{rendered}]")
+                lines.append(f"{key}:")
+                for item in value:
+                    rendered = str(item)
+                    if isinstance(item, str) and any(ch in item for ch in ":#,[]"):
+                        rendered = f'"{item}"'
+                    lines.append(f"  - {rendered}")
             else:
                 lines.append(f"{key}:")
                 for item in value:

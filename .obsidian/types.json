@@ -1,0 +1,28 @@
+{
+  "types": {
+    "aliases": "aliases",
+    "affiliation": "text",
+    "authors": "multitext",
+    "cssclasses": "multitext",
+    "date_added": "date",
+    "domain": "text",
+    "key_sources": "multitext",
+    "maturity": "text",
+    "name": "text",
+    "priority": "number",
+    "relation_compares_with": "multitext",
+    "relation_contradicts": "multitext",
+    "relation_derived_from": "multitext",
+    "relation_extends": "multitext",
+    "relation_supports": "multitext",
+    "relation_uses": "multitext",
+    "slug": "text",
+    "source_kind": "text",
+    "source_path": "text",
+    "status": "text",
+    "tags": "tags",
+    "theorem_kind": "text",
+    "title": "text",
+    "year": "number"
+  }
+}

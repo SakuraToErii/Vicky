@@ -29,6 +29,7 @@ Thumbs.db
 # Obsidian local state
 .obsidian/*
 !.obsidian/templates.json
+!.obsidian/types.json
 
 # Virtual environment
 .venv/

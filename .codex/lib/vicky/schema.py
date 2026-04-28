@@ -81,7 +81,7 @@ FIELD_DEFAULTS = {
     "people": {"tags": "[]"},
     "ideas": {"status": "fleeting", "tags": "[]", "priority": "3"},
     "theorems": {"theorem_kind": "note", "status": "draft", "key_sources": "[]", "tags": "[]"},
-    "foundations": {"status": "canonical"},
+    "foundations": {"aliases": "[]", "status": "canonical"},
 }
 
 PAGE_TYPE_FORMULA = 'file.folder.replace("wiki/", "")'

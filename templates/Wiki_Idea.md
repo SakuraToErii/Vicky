@@ -10,7 +10,6 @@ relation_supports: []
 relation_contradicts: []
 relation_uses: []
 relation_compares_with: []
-date_updated: "{{date}}"
 ---
 
 ## Prompt

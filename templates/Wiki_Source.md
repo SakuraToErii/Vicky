@@ -4,10 +4,8 @@ slug: ""
 source_kind: paper
 source_path: ""
 authors: []
-year: ""
 tags: []
-source_ids: {}
-date_added: "{{date}}"
+date_added: "{{date:YYYY-MM-DD}}"
 ---
 
 ## Summary
