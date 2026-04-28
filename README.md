@@ -58,6 +58,7 @@ Requirements:
 
 - Python 3.9+
 - Codex CLI
+- Obsidian CLI (`obsidian`) and ripgrep (`rg`) for vault diagnostics and filtered graph checks
 
 Bootstrap:
 
