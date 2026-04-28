@@ -1,10 +1,20 @@
 # Vicky
 
-An Obsidian-first LLM wiki for reading papers, blogs, and technical notes with a persistent Markdown knowledge base.
+A lightweight, Obsidian-native LLM wiki for reading papers, blogs, and technical notes.
 
-Vicky turns source material in `raw/` into structured notes in `wiki/`. Obsidian is the browsing and editing surface. Codex skills and local tools maintain the schema, semantic relations, logs, support files, and checks.
+Vicky turns source material in `raw/` into long-lived Markdown notes in `wiki/`. It is built for two readers: you, writing and studying in Obsidian; and Codex, maintaining schema, semantic relations, logs, support files, and checks through local skills.
+
+Vicky follows Andrej Karpathy's [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern: raw sources feed a maintained Markdown wiki, the schema lives in `AGENTS.md`, and the core loop is ingest, ask, and check. Vicky adapts that pattern for an Obsidian-first personal research workflow with Bases, Obsidian CLI, and lightweight repo-local scripts.
 
 The name `Vicky` echoes `wiki` and gives the vault a human name. It reads as a familiar female given name in English and keeps the project memorable.
+
+## What Vicky Optimizes For
+
+- Lightweight vault shape: plain Markdown, Obsidian properties, Bases, Codex skills, and a small set of Python helpers.
+- Human-first knowledge work: notes stay readable, editable, and useful for daily study inside Obsidian.
+- AI-assisted maintenance: Codex handles repeatable structure, semantic relation checks, duplicate checks, and lint.
+- Obsidian-native operations: reads, writes, property edits, search, links, backlinks, outlines, and graph diagnostics use Obsidian CLI wherever possible.
+- Durable semantic graph: six frozen `relation_*` fields keep relationships searchable while `## Relations` keeps evidence readable.
 
 ## Repository Layout
 
