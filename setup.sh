@@ -88,7 +88,7 @@ fi
 echo ""
 info "Verifying core imports..."
 
-if (cd .tools && "$VENV_PYTHON_ABS" -c "from research_wiki import slugify; from lint import run_lint; from fetch_s2 import search") >/dev/null 2>&1; then
+if PYTHONPATH="$PROJECT_ROOT/.codex/lib:$PROJECT_ROOT/.codex/skills/check/tools:$PROJECT_ROOT/.codex/skills/ingest/tools:$PROJECT_ROOT/.codex/skills/reset/tools" "$VENV_PYTHON_ABS" -c "from vicky.schema import INDEXED_DIRS; from lint import run_lint; from wiki_graph import query_orphans; from fetch_s2 import search; from reset_wiki import plan" >/dev/null 2>&1; then
     ok "Core tools import cleanly"
 else
     fail "Core tool import failed"

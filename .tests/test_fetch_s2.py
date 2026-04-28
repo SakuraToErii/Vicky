@@ -1,4 +1,4 @@
-"""Tests for .tools/fetch_s2.py."""
+"""Tests for ingest skill Semantic Scholar tool."""
 
 from __future__ import annotations
 
@@ -10,7 +10,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / ".tools"))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
+TOOLS_DIR = PROJECT_ROOT / ".codex" / "skills" / "ingest" / "tools"
+sys.path.insert(0, str(LIB_DIR))
+sys.path.insert(0, str(TOOLS_DIR))
 from fetch_s2 import (
     BASE_URL,
     FIELDS,
@@ -347,57 +351,57 @@ class TestCLI:
 
     def test_cli_help(self):
         result = subprocess.run(
-            [sys.executable, ".tools/fetch_s2.py", "--help"],
+            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "--help"],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).resolve().parent.parent),
+            cwd=str(PROJECT_ROOT),
         )
         assert result.returncode == 0
         assert "Semantic Scholar" in result.stdout
 
     def test_cli_search_help(self):
         result = subprocess.run(
-            [sys.executable, ".tools/fetch_s2.py", "search", "--help"],
+            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "search", "--help"],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).resolve().parent.parent),
+            cwd=str(PROJECT_ROOT),
         )
         assert result.returncode == 0
         assert "query" in result.stdout.lower()
 
     def test_cli_paper_help(self):
         result = subprocess.run(
-            [sys.executable, ".tools/fetch_s2.py", "paper", "--help"],
+            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "paper", "--help"],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).resolve().parent.parent),
+            cwd=str(PROJECT_ROOT),
         )
         assert result.returncode == 0
         assert "arxiv_id" in result.stdout
 
     def test_cli_citations_help(self):
         result = subprocess.run(
-            [sys.executable, ".tools/fetch_s2.py", "citations", "--help"],
+            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "citations", "--help"],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).resolve().parent.parent),
+            cwd=str(PROJECT_ROOT),
         )
         assert result.returncode == 0
 
     def test_cli_references_help(self):
         result = subprocess.run(
-            [sys.executable, ".tools/fetch_s2.py", "references", "--help"],
+            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "references", "--help"],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).resolve().parent.parent),
+            cwd=str(PROJECT_ROOT),
         )
         assert result.returncode == 0
 
     def test_cli_no_command_fails(self):
         result = subprocess.run(
-            [sys.executable, ".tools/fetch_s2.py"],
+            [sys.executable, str(TOOLS_DIR / "fetch_s2.py")],
             capture_output=True,
             text=True,
-            cwd=str(Path(__file__).resolve().parent.parent),
+            cwd=str(PROJECT_ROOT),
         )
         assert result.returncode != 0

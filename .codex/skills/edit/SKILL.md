@@ -24,11 +24,20 @@ Apply a targeted vault edit.
 9. Use `wiki/bases/Semantic Relations.base#Relation review` after relation-property edits.
 10. Append a log line for substantive changes with `obsidian append file=log content="## [YYYY-MM-DD] edit | ..."`.
 
+## Relation Fields
+
+- `relation_derived_from`
+- `relation_extends`
+- `relation_supports`
+- `relation_contradicts`
+- `relation_uses`
+- `relation_compares_with`
+
 ## Constraints
 
 - Treat `raw/` as user-owned input.
 - Keep edits scoped to the pages the user asked for.
 - Keep relation properties visible in the semantic Bases workbench.
-- Follow `.docs/semantic-relations.en.md` for relation field stability rules.
+- Treat the six listed `relation_*` fields as the frozen relation contract.
 - Prefer `file=<slug>` for existing notes and `path=` for exact destinations.
 - Prefer Obsidian CLI for reads, property edits, appends, prepends, renames, and moves.

@@ -13,9 +13,9 @@ Reset part of the vault after showing a concrete deletion plan.
 
 ## Workflow
 
-1. Run `./.venv/bin/python .tools/reset_wiki.py --scope <scope>` to print the plan.
+1. Run `./.venv/bin/python .codex/skills/reset/tools/reset_wiki.py --scope <scope>` to print the plan.
 2. Show the plan to the user.
-3. After explicit confirmation, run `./.venv/bin/python .tools/reset_wiki.py --scope <scope> --yes`.
+3. After explicit confirmation, run `./.venv/bin/python .codex/skills/reset/tools/reset_wiki.py --scope <scope> --yes`.
 4. For `wiki` scope, confirm `wiki/bases/Semantic Relations.base` and `wiki/bases/Current Page Neighbors.base` were restored.
 5. Append a log line unless `log` was reset.
 

@@ -2,10 +2,10 @@
 """Semantic Scholar API wrapper.
 
 Usage:
-    ./.venv/bin/python .tools/fetch_s2.py search "low rank adaptation"
-    ./.venv/bin/python .tools/fetch_s2.py paper 2106.09685
-    ./.venv/bin/python .tools/fetch_s2.py citations 2106.09685
-    ./.venv/bin/python .tools/fetch_s2.py references 2106.09685
+    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py search "low rank adaptation"
+    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py paper 2106.09685
+    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py citations 2106.09685
+    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py references 2106.09685
 """
 
 from __future__ import annotations
@@ -15,8 +15,14 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 
-import _env  # noqa: F401 — load .env files for API keys
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
+if str(LIB_DIR) not in sys.path:
+    sys.path.insert(0, str(LIB_DIR))
+
+import vicky.env  # noqa: F401 - load .env files for API keys
 
 import requests
 

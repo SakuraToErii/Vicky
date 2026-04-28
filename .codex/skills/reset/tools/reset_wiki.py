@@ -9,8 +9,13 @@ import shutil
 import sys
 from pathlib import Path
 
-from _schemas import INDEXED_DIRS, RAW_DIRS, SUPPORT_DIRS
-from _support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
+if str(LIB_DIR) not in sys.path:
+    sys.path.insert(0, str(LIB_DIR))
+
+from vicky.schema import INDEXED_DIRS, RAW_DIRS, SUPPORT_DIRS
+from vicky.support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
 
 ALL_SCOPES = ["wiki", "raw", "log", "checkpoints"]
 

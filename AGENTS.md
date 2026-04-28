@@ -1,46 +1,41 @@
-# Vicky — Runtime Schema
+# Vicky Runtime Contract
 
-This file defines the working contract for the Vicky vault in Codex.
+This file is the global contract for Codex inside the Vicky vault.
 
-## Repository layout
+## Repository Layout
 
-### `raw/` is the source layer
+`raw/` is the source layer:
 
-- `raw/papers/` stores user-owned paper sources that are already prepared as `.tex` or `.md`
-- `raw/web/` stores user-owned web clips or exported pages
+- `raw/papers/` stores prepared paper sources as `.tex` or `.md`
+- `raw/web/` stores web clips or exported pages
 - `raw/inbox/` stores temporary snippets, prompts, and scratch material
 
-Treat `raw/` as read-only input. The LLM reads from it and writes nowhere under it.
+Treat `raw/` as user-owned input. Read from it and write to `wiki/`.
 
-### `wiki/` is the maintained knowledge layer
+`wiki/` is the maintained knowledge layer:
 
 - `wiki/sources/` stores one page per ingested source
 - `wiki/concepts/` stores reusable concepts
-- `wiki/theorems/` stores definitions, theorems, propositions, examples, and related formal objects
+- `wiki/theorems/` stores definitions, lemmas, propositions, theorems, examples, algorithms, and formal notes
 - `wiki/foundations/` stores stable background knowledge
 - `wiki/people/` stores author and researcher pages
 - `wiki/ideas/` stores developing thoughts and open directions
 - `wiki/topics/` stores higher-level maps across multiple pages
 - `wiki/outputs/` stores saved answers, comparisons, and syntheses
-- `wiki/bases/` stores Obsidian Bases workbenches for relation review
+- `wiki/bases/` stores Obsidian Bases workbenches
 - `wiki/log.md` is append-only
 
-Open `.docs/runtime-directory-structure.en.md` for the full directory map.
-Open `templates/` for the Obsidian page templates.
-Open `.codex/skills/init/references/wiki-bootstrap-templates.md` for the template-name map and support-file commands.
-Open `.codex/skills/ingest/references/wiki-update-templates.md` for ingest-time template selection and relation rules.
-Open `.docs/obsidian-cli-workflows.en.md` for the default vault command set.
-Open `.docs/runtime-page-templates.en.md` and `.docs/runtime-support-files.en.md` for concise summaries.
-Open `.docs/obsidian-bases-semantic-graph.en.md` for the Bases relation workflow.
-Open `.docs/semantic-relations.en.md` for the canonical relation field contract.
+`templates/` stores one Obsidian template per wiki page type. `.obsidian/templates.json` points Obsidian CLI at `templates/`.
 
-## Page types
+`.codex/` contains skills, skill-local tools, and shared helper code:
 
-`sources`, `concepts`, `topics`, `people`, `ideas`, `theorems`, `foundations`.
+- `.codex/skills/*/SKILL.md` holds workflow instructions
+- `.codex/skills/*/tools/` holds tools owned by one skill
+- `.codex/lib/vicky/` holds shared schema, frontmatter, markdown, and support-file helpers
 
-## Link syntax
+## Page And Link Rules
 
-Use Obsidian wikilinks everywhere:
+Use lowercase hyphenated slugs with Obsidian wikilinks:
 
 ```markdown
 [[low-rank-adaptation]]
@@ -48,12 +43,7 @@ Use Obsidian wikilinks everywhere:
 [[john-doe]]
 ```
 
-Use lowercase hyphenated slugs with no spaces.
-
-## Cross-reference rules
-
-When writing a forward link, also maintain the relevant source backlinks.
-Use `wiki/sources/{slug}.md` as the citation anchor for raw files. Other wiki pages should cite source pages through `key_sources` or relation fields, while source pages keep `source_path` pointing at `raw/`.
+Use `wiki/sources/{slug}.md` as the citation anchor for raw files. Other wiki pages cite source pages through `key_sources` or relation fields. Source pages keep `source_path` pointing at `raw/`.
 
 During ingest, create the source page automatically. Create or update non-source knowledge pages after the user names the target or approves a proposal.
 
@@ -62,49 +52,109 @@ During ingest, create the source page automatically. Create or update non-source
 | `sources/A` links `[[concept-B]]` | `concepts/B` includes `A` in `key_sources` |
 | `sources/A` links `[[theorem-C]]` | `theorems/C` includes `A` in `key_sources` |
 | `sources/A` links `[[person-D]]` | `people/D` includes `A` in `key_sources` |
-| `concepts/K` links `[[topic-T]]` | `topics/T` should mention `K` in body or related section |
-| any page links `[[foundation-X]]` | no reverse link is required |
+| `concepts/K` links `[[topic-T]]` | `topics/T` mentions `K` in body or related section |
+| any page links `[[foundation-X]]` | foundation pages can receive one-way links |
 
-## Semantic relations
+## Semantic Relations
 
-Follow `.docs/semantic-relations.en.md` for the canonical relation field list, frozen schema rule, Base workbenches, and retrieval contract.
+Use these six relation fields as the frozen semantic graph schema:
 
-Use relation properties for machine-searchable edges and mirror every stable relation property in a `## Relations` body section with a short explanation. Properties are the graph index. `## Relations` is the evidence context.
+- `relation_derived_from`
+- `relation_extends`
+- `relation_supports`
+- `relation_contradicts`
+- `relation_uses`
+- `relation_compares_with`
 
-## Bases and log
+Use Obsidian wikilink strings as values:
 
-`wiki/bases/Semantic Relations.base` is the primary human-facing workbench for semantic relations. It shows all wiki pages with page type, source links, relation fields, relation counts, and a relation-review queue.
+```yaml
+relation_derived_from:
+  - "[[source-paper-a]]"
+relation_extends:
+  - "[[concept-b]]"
+relation_supports: []
+relation_contradicts: []
+relation_uses: []
+relation_compares_with: []
+```
 
-`wiki/bases/Current Page Neighbors.base` is the local neighborhood panel described in `.docs/semantic-relations.en.md`.
+Mirror every stable relation property in a `## Relations` body section with a short evidence sentence:
 
-Use Obsidian CLI search, context search, properties, links, backlinks, and outlines as the machine retrieval path.
+```markdown
+## Relations
 
-`wiki/log.md` is chronological. Standard format:
+- Derived from [[source-paper-a]]: uses its proof setup and relaxes the boundedness assumption.
+- Extends [[concept-b]]: generalizes the finite case to the stochastic setting.
+```
+
+Properties are the graph index. `## Relations` is the evidence context.
+
+## Bases And Retrieval
+
+`wiki/bases/Semantic Relations.base` is the human-facing semantic graph workbench. It shows all wiki pages with page type, source links, relation fields, relation counts, and a relation-review queue.
+
+`wiki/bases/Current Page Neighbors.base` is the embeddable local neighborhood panel:
+
+```markdown
+![[Current Page Neighbors.base#Semantic neighbors]]
+```
+
+Machine retrieval starts with Obsidian CLI search and context search, then expands through properties, links, backlinks, outlines, and selected page reads.
+
+## Obsidian CLI Defaults
+
+Run commands from the vault root. Existing notes use `file=<slug>`. Exact destinations use `path=wiki/<type>/<slug>.md`.
+
+| Task | Command |
+|---|---|
+| Read a note | `obsidian read file=<slug>` |
+| Read a property | `obsidian property:read file=<slug> name=<field>` |
+| Set a scalar property | `obsidian property:set file=<slug> name=<field> value=<value> type=text` |
+| Set a plain list property | `obsidian property:set file=<slug> name=tags value="paper,attention" type=list` |
+| Create a page | `obsidian create path="wiki/concepts/<slug>.md" template="Wiki_Concept"` |
+| Append to a note | `obsidian append file=<slug> content="<markdown>"` |
+| Search text | `obsidian search query="<term>" path=wiki` |
+| Search with context | `obsidian search:context query="<term>" path=wiki` |
+| Outgoing links | `obsidian links file=<slug>` |
+| Backlinks | `obsidian backlinks file=<slug>` |
+| Outline | `obsidian outline file=<slug> format=json` |
+| Unresolved links | `obsidian unresolved verbose format=json` |
+| List wiki files | `obsidian files folder=wiki ext=md` |
+
+Repo-local graph checks use skill tools:
+
+```bash
+.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki orphans
+.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki deadends
+```
+
+## Log Format
+
+`wiki/log.md` is chronological and append-only:
 
 ```markdown
 ## [YYYY-MM-DD] ingest | added sources/<slug> | updated: concepts/<slug>, topics/<slug>
+## [YYYY-MM-DD] ask | <question-slug> | saved: outputs/<slug>
 ```
 
-Append log entries with `obsidian append file=log content="## [YYYY-MM-DD] ..."` from the vault root.
+Append log entries with:
 
-## Constraints
+```bash
+obsidian append file=log content="## [YYYY-MM-DD] ..."
+```
 
-- `raw/` is user-owned input and read-only.
-- `wiki/` is the maintained layer.
-- `sources/` is the source page layer.
-- The vault relies on plain Markdown and Obsidian links, not on generated graph state.
-- `Semantic Scholar` metadata is optional enrichment, not a hard dependency.
-- `foundations/` are stable background notes. They can receive links from other pages.
-- `outputs/` can hold query results and saved syntheses. They use a lighter schema focused on saved answers, citations, and stable relation links.
-- Obsidian CLI is the default interface for vault reads, note creation, property edits, search, link checks, log appends, renames, and moves.
-- Python tools are reserved for strict lint rules, Semantic Scholar metadata, setup, tests, and reset dry-runs.
+## Tool Boundaries
 
-## Template references
+Use Obsidian CLI for vault reads, note creation, property edits, search, link checks, log appends, renames, and moves.
 
-- `templates/` stores one Obsidian template per wiki page type.
-- `.obsidian/templates.json` points Obsidian CLI at `templates/`.
-- `.codex/skills/init/references/wiki-bootstrap-templates.md` maps wiki paths to template names and support-file commands.
-- `.codex/skills/ingest/references/wiki-update-templates.md` maps ingest page types to template names and relation rules.
+Use Python for:
+
+- strict lint rules: `.codex/skills/check/tools/lint.py`
+- repo-local wiki graph diagnostics: `.codex/skills/check/tools/wiki_graph.py`
+- Semantic Scholar metadata: `.codex/skills/ingest/tools/fetch_s2.py`
+- reset previews and guarded reset execution: `.codex/skills/reset/tools/reset_wiki.py`
+- tests and setup checks
 
 ## Skills
 

@@ -19,7 +19,7 @@ Prepare the local environment for the Vicky vault.
 
 ## Workflow
 
-1. Confirm the working directory contains `raw/`, `wiki/`, `.tools/`, and `.config/`.
+1. Confirm the working directory contains `raw/`, `wiki/`, `.codex/`, and `.config/`.
 2. Run `./setup.sh`.
 3. Report whether `.venv`, `.env`, and `.codex/settings.local.json` are ready.
 

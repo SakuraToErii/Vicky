@@ -1,4 +1,4 @@
-"""Tests for .tools/lint.py."""
+"""Tests for check skill lint tool."""
 
 import json
 import sys
@@ -7,10 +7,12 @@ from pathlib import Path
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-TOOLS_DIR = PROJECT_ROOT / ".tools"
+LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
+TOOLS_DIR = PROJECT_ROOT / ".codex" / "skills" / "check" / "tools"
+sys.path.insert(0, str(LIB_DIR))
 sys.path.insert(0, str(TOOLS_DIR))
-import _schemas as schema_mod
 import lint as lint_mod
+import vicky.schema as schema_mod
 
 
 def test_relation_schema_is_frozen():

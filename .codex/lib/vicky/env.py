@@ -9,7 +9,7 @@ Load order (later files do NOT override earlier ones):
   3. os.environ      (always takes precedence — already-set vars are never overwritten)
 
 Usage in any tool:
-    import _env  # noqa: F401  (side-effect import, loads env vars)
+    import vicky.env  # noqa: F401  (side-effect import, loads env vars)
 """
 
 from __future__ import annotations

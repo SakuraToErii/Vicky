@@ -35,22 +35,20 @@ templates/
 └── Wiki_Output.md
 ```
 
-Engineering support directories stay hidden at the vault root: `.docs/`, `.tools/`, `.tests/`, `.config/`, `.codex/`, `.obsidian/`, and `.github/`.
+Engineering support stays under `.codex/`, `.tests/`, `.config/`, `.obsidian/`, and `.github/`.
 
 ## Workflow
 
 1. Add source files to `raw/papers/`, `raw/web/`, or `raw/inbox/`.
 2. Ask the agent to ingest the source into `wiki/sources/`.
-3. Create or update related concepts, theorems, foundations, people, ideas, topics, and outputs.
+3. Create or update user-approved concepts, theorems, foundations, people, ideas, topics, and outputs.
 4. Review semantic edges in `wiki/bases/Semantic Relations.base`.
 5. Ask questions against the maintained wiki through the repo-local `ask` skill.
 6. Run lint when the vault structure changes.
 
 ## Semantic Graph
 
-Semantic edges live in Markdown properties and stay aligned with `## Relations` evidence blocks.
-
-The canonical relation contract lives in [.docs/semantic-relations.en.md](/Users/ordis/Desktop/Vicky/.docs/semantic-relations.en.md:1). It defines the six frozen `relation_*` fields, the frontmatter format, the Bases workbenches, and the search-first retrieval path.
+Semantic edges live in Markdown properties and stay aligned with `## Relations` evidence blocks. The six frozen fields are `relation_derived_from`, `relation_extends`, `relation_supports`, `relation_contradicts`, `relation_uses`, and `relation_compares_with`.
 
 ## Setup
 
@@ -75,7 +73,7 @@ The script creates `.venv`, installs dependencies, writes `.env` from `.config/.
 Run the strict vault lint:
 
 ```bash
-.venv/bin/python .tools/lint.py --wiki-dir wiki --json
+.venv/bin/python .codex/skills/check/tools/lint.py --wiki-dir wiki --json
 ```
 
 Run the test suite:
@@ -95,8 +93,8 @@ obsidian files
 Repo-local graph diagnostics:
 
 ```bash
-.venv/bin/python .tools/research_wiki.py query wiki orphans
-.venv/bin/python .tools/research_wiki.py query wiki deadends
+.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki orphans
+.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki deadends
 ```
 
 ## Obsidian Notes
