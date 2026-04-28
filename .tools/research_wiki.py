@@ -19,6 +19,7 @@ from pathlib import Path
 
 from _schemas import FIELD_DEFAULTS, INDEXED_DIRS
 from _support_files import LOG_TEMPLATE, ensure_support_files
+from _markdown import WIKILINK_RE, find_wikilinks
 from _frontmatter import (
     FRONTMATTER_RE,
     parse_frontmatter_file as _parse_frontmatter,
@@ -56,7 +57,6 @@ STOP_WORDS = frozenset(
     }
 )
 
-WIKILINK_RE = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]+)?\]\]")
 COMPARE_RE = re.compile(r"^([<>]=?|!=)(.+)$")
 
 
@@ -180,7 +180,7 @@ def _graph_links(wiki_root: str) -> tuple[dict[str, Path], dict[str, set[str]], 
     outbound: dict[str, set[str]] = {slug: set() for slug in pages}
     for slug, file_path in pages.items():
         content = file_path.read_text(encoding="utf-8")
-        for target in WIKILINK_RE.findall(content):
+        for target in find_wikilinks(content):
             link_target = _normalize_link_target(target)
             if link_target not in pages:
                 continue

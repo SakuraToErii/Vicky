@@ -80,6 +80,28 @@ class TestBrokenLinks:
         issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert not issues
 
+    def test_code_block_link_is_ignored(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
+            "```md\n[[missing-page]]\n```",
+        )
+        issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
+        assert not issues
+
+    def test_html_comment_link_is_ignored(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
+            "<!-- [[missing-page]] -->",
+        )
+        issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
+        assert not issues
+
 
 class TestSupportFiles:
     def test_invalid_support_files_detected_and_fixed(self, wiki_dir):
@@ -111,6 +133,16 @@ class TestSupportFiles:
         fixes = lint_mod.apply_fixes(wiki_dir, issues, dry_run=False)
         assert any(fix.file == malformed_base for fix in fixes)
         assert (wiki_dir / malformed_base).read_text(encoding="utf-8") == schema_mod.BASE_FILE_TEMPLATES[malformed_base]
+
+    def test_base_support_file_allows_extra_ui_state(self, wiki_dir):
+        base_name = next(iter(schema_mod.BASE_FILE_TEMPLATES))
+        base_path = wiki_dir / base_name
+        base_path.write_text(
+            schema_mod.BASE_FILE_TEMPLATES[base_name] + "\nuiState:\n  columnSize:\n    file.path: 280\n",
+            encoding="utf-8",
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert not any(issue.file == base_name and issue.category == "support-file" for issue in issues)
 
     def test_duplicate_slug_detected(self, wiki_dir):
         _write_page(
@@ -309,6 +341,30 @@ class TestRelationConsistency:
         )
         issues = lint_mod.run_lint(wiki_dir)
         assert not any(issue.category == "relation" for issue in issues)
+
+    def test_relation_code_block_link_does_not_count_as_explanation(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            [
+                'title: "Concept A"',
+                "slug: concept-a",
+                "tags: [ml]",
+                "maturity: working",
+                "key_sources: [paper-a]",
+                'relation_derived_from: ["[[paper-a]]"]',
+            ],
+            "## Relations\n\n```md\n- Derived from [[paper-a]]\n```\n",
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any("lacks matching explanation" in issue.message for issue in issues)
 
 
 class TestCliJson:

@@ -96,6 +96,14 @@ class TestQueryOrphans:
         orphan_slugs = {item["slug"] for item in payload}
         assert "john-doe" not in orphan_slugs
 
+    def test_code_block_link_does_not_count_as_inbound(self, wiki, capsys):
+        _write_page(wiki, "people", "john-doe", 'name: "John Doe"\nslug: john-doe\ntags: [ml]\nkey_sources: []')
+        _write_page(wiki, "topics", "topic-a", 'title: "Topic A"\nslug: topic-a\ntags: [ml]', "```md\n[[john-doe]]\n```")
+        rw.query_orphans(str(wiki))
+        payload = json.loads(capsys.readouterr().out.strip())
+        orphan_slugs = {item["slug"] for item in payload}
+        assert "john-doe" in orphan_slugs
+
 
 class TestQueryDeadends:
     def test_reports_pages_without_outgoing_links(self, wiki, capsys):
@@ -116,6 +124,14 @@ class TestQueryDeadends:
         payload = json.loads(capsys.readouterr().out.strip())
         deadend_slugs = {item["slug"] for item in payload}
         assert "topic-a" not in deadend_slugs
+
+    def test_code_block_link_does_not_count_as_outgoing(self, wiki, capsys):
+        _write_page(wiki, "people", "john-doe", 'name: "John Doe"\nslug: john-doe\ntags: [ml]\nkey_sources: []')
+        _write_page(wiki, "topics", "topic-a", 'title: "Topic A"\nslug: topic-a\ntags: [ml]', "```md\n[[john-doe]]\n```")
+        rw.query_deadends(str(wiki))
+        payload = json.loads(capsys.readouterr().out.strip())
+        deadend_slugs = {item["slug"] for item in payload}
+        assert "topic-a" in deadend_slugs
 
 
 class TestMetaRoundtrip:

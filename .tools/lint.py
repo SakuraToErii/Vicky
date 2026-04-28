@@ -12,9 +12,8 @@ from pathlib import Path
 
 from _schemas import FIELD_DEFAULTS, INDEXED_DIRS, RELATION_FIELDS, REQUIRED_FIELDS, VALID_VALUES
 from _frontmatter import FRONTMATTER_RE, parse_frontmatter, parse_scalar as _parse_scalar, serialize_frontmatter as _serialize_frontmatter
+from _markdown import WIKILINK_RE, find_wikilinks
 from _support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
-
-WIKILINK_RE = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
 
 
 class LintIssue:
@@ -100,7 +99,7 @@ def check_support_files(wiki_dir: Path) -> list[LintIssue]:
             continue
         support_specs[filename] = {
             "template": template,
-            "validators": [lambda content, expected=template: content == expected],
+            "validators": [lambda content, expected=template: _contains_canonical_template(content, expected)],
             "message": "Support base does not match the current base template",
         }
     for filename, spec in support_specs.items():
@@ -131,6 +130,25 @@ def check_support_files(wiki_dir: Path) -> list[LintIssue]:
             )
         )
     return issues
+
+
+def _normalized_nonempty_lines(content: str) -> list[str]:
+    return [line.rstrip() for line in content.splitlines() if line.strip()]
+
+
+def _contains_canonical_template(content: str, template: str) -> bool:
+    template_lines = _normalized_nonempty_lines(template)
+    if not template_lines:
+        return True
+    content_lines = _normalized_nonempty_lines(content)
+    index = 0
+    for line in content_lines:
+        if line != template_lines[index]:
+            continue
+        index += 1
+        if index == len(template_lines):
+            return True
+    return False
 
 
 def check_missing_fields(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIssue]:
@@ -164,7 +182,7 @@ def check_broken_links(
     for slug, file_path in pages.items():
         content = file_path.read_text(encoding="utf-8")
         rel_path = str(file_path.relative_to(wiki_dir))
-        for target in WIKILINK_RE.findall(content):
+        for target in find_wikilinks(content):
             link_target = _normalize_link_target(target)
             if _is_support_link(link_target):
                 continue
@@ -262,7 +280,7 @@ def check_relation_consistency(wiki_dir: Path, pages: dict[str, Path]) -> list[L
         relations_body = _section_body(content, "## Relations")
         body_targets = {
             normalized
-            for target in WIKILINK_RE.findall(relations_body)
+            for target in find_wikilinks(relations_body)
             if (normalized := _normalize_link_target(target))
         }
         property_targets: set[str] = set()
