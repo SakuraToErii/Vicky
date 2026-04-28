@@ -9,9 +9,9 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
-TOOLS_DIR = PROJECT_ROOT / ".codex" / "skills" / "reset" / "tools"
+SCRIPTS_DIR = PROJECT_ROOT / ".codex" / "skills" / "reset" / "scripts"
 sys.path.insert(0, str(LIB_DIR))
-sys.path.insert(0, str(TOOLS_DIR))
+sys.path.insert(0, str(SCRIPTS_DIR))
 import reset_wiki as rw
 import vicky.schema as schema_mod
 
@@ -77,7 +77,7 @@ def test_execute_log_resets_template(project):
 
 def test_cli_dry_run(project):
     result = subprocess.run(
-        [sys.executable, str(TOOLS_DIR / "reset_wiki.py"), "--scope", "wiki", "--project-root", str(project)],
+        [sys.executable, str(SCRIPTS_DIR / "reset_wiki.py"), "--scope", "wiki", "--project-root", str(project)],
         capture_output=True,
         text=True,
         check=True,

@@ -2,10 +2,10 @@
 """Semantic Scholar API wrapper.
 
 Usage:
-    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py search "low rank adaptation"
-    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py paper 2106.09685
-    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py citations 2106.09685
-    ./.venv/bin/python .codex/skills/ingest/tools/fetch_s2.py references 2106.09685
+    ./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py search "low rank adaptation"
+    ./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py paper 2106.09685
+    ./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py citations 2106.09685
+    ./.venv/bin/python .codex/skills/ingest/scripts/fetch_s2.py references 2106.09685
 """
 
 from __future__ import annotations

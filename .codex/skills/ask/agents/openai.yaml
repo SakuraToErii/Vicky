@@ -1,0 +1,8 @@
+interface:
+  display_name: "Vicky Ask"
+  short_description: "Query the maintained wiki with citations."
+  brand_color: "#2E7D6B"
+  default_prompt: "Use $ask to answer a question against the Vicky wiki with page citations."
+
+policy:
+  allow_implicit_invocation: true

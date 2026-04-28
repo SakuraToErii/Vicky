@@ -8,9 +8,9 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
-TOOLS_DIR = PROJECT_ROOT / ".codex" / "skills" / "check" / "tools"
+SCRIPTS_DIR = PROJECT_ROOT / ".codex" / "skills" / "check" / "scripts"
 sys.path.insert(0, str(LIB_DIR))
-sys.path.insert(0, str(TOOLS_DIR))
+sys.path.insert(0, str(SCRIPTS_DIR))
 import lint as lint_mod
 import vicky.schema as schema_mod
 

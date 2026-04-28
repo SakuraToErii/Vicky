@@ -1,0 +1,8 @@
+interface:
+  display_name: "Vicky Setup"
+  short_description: "Prepare the local Vicky environment."
+  brand_color: "#527A3D"
+  default_prompt: "Use $setup to prepare the local Vicky repository environment."
+
+policy:
+  allow_implicit_invocation: true

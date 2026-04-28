@@ -43,15 +43,16 @@ Query the maintained wiki.
 5. Run property relation search for strong candidate slugs:
    - Query both raw slug values and wikilink-string values, e.g. `[relation_derived_from:<slug>]` and `[relation_derived_from:[[<slug>]]]`.
    - Repeat this for `relation_derived_from`, `relation_extends`, `relation_supports`, `relation_contradicts`, `relation_uses`, and `relation_compares_with`.
-6. For each strong candidate, expand one hop with `obsidian links file=<slug>` and `obsidian backlinks file=<slug>`.
-7. Read properties for top candidates with `obsidian property:read file=<slug> name=<field>` where useful. Include title/name, tags, status/maturity, key_sources, source_path, and relation fields.
-8. Read outlines for long candidates with `obsidian outline file=<slug> format=json`.
-9. Use `obsidian files folder=wiki ext=md` as the broad-query fallback when search returns too few candidates or the user asks for a whole-vault map.
-10. Rerank candidates using this priority: title/slug match, `search:context` match, relation-property match, one-hop link neighbor, page type, source recency or maturity fields when available.
-11. Read the selected 5-12 pages with `obsidian read file=<slug>`. Use `path=wiki/<type>/<slug>.md` when a slug is ambiguous.
-12. Answer with explicit `[[slug]]` citations.
-13. When the answer is worth preserving, create `wiki/outputs/{slug}.md` with `obsidian create path="wiki/outputs/{slug}.md" template="Wiki_Output"` and fill the answer.
-14. Append a log line with `obsidian append file=log content="## [YYYY-MM-DD] ask | <question-slug> | saved: outputs/<slug>"`.
+6. Use `./.venv/bin/python .codex/skills/ask/scripts/frontmatter_find.py wiki <page-type> --<field> <value>` when Obsidian property search needs a deterministic frontmatter filter.
+7. For each strong candidate, expand one hop with `obsidian links file=<slug>` and `obsidian backlinks file=<slug>`.
+8. Read properties for top candidates with `obsidian property:read file=<slug> name=<field>` where useful. Include title/name, tags, status/maturity, key_sources, source_path, and relation fields.
+9. Read outlines for long candidates with `obsidian outline file=<slug> format=json`.
+10. Use `obsidian files folder=wiki ext=md` as the broad-query fallback when search returns too few candidates or the user asks for a whole-vault map.
+11. Rerank candidates using this priority: title/slug match, `search:context` match, relation-property match, one-hop link neighbor, page type, source recency or maturity fields when available.
+12. Read the selected 5-12 pages with `obsidian read file=<slug>`. Use `path=wiki/<type>/<slug>.md` when a slug is ambiguous.
+13. Answer with explicit `[[slug]]` citations.
+14. When the answer is worth preserving, create `wiki/outputs/{slug}.md` with `obsidian create path="wiki/outputs/{slug}.md" template="Wiki_Output"` and fill the answer.
+15. Append a log line with `obsidian append file=log content="## [YYYY-MM-DD] ask | <question-slug> | saved: outputs/<slug>"`.
 
 ## Constraints
 

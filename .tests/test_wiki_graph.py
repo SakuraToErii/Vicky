@@ -10,9 +10,9 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
-TOOLS_DIR = PROJECT_ROOT / ".codex" / "skills" / "check" / "tools"
+SCRIPTS_DIR = PROJECT_ROOT / ".codex" / "skills" / "check" / "scripts"
 sys.path.insert(0, str(LIB_DIR))
-sys.path.insert(0, str(TOOLS_DIR))
+sys.path.insert(0, str(SCRIPTS_DIR))
 
 import wiki_graph
 from vicky.support_files import ensure_support_files
@@ -82,7 +82,7 @@ class TestQueryDeadends:
 
 class TestCli:
     def test_cli_json_output(self, wiki):
-        script = TOOLS_DIR / "wiki_graph.py"
+        script = SCRIPTS_DIR / "wiki_graph.py"
         result = __import__("subprocess").run(
             [sys.executable, str(script), str(wiki), "orphans"],
             capture_output=True,

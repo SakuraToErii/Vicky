@@ -1,0 +1,8 @@
+interface:
+  display_name: "Vicky Check"
+  short_description: "Run Obsidian and schema health checks."
+  brand_color: "#5B6CFF"
+  default_prompt: "Use $check to inspect the Vicky vault for structural and relation issues."
+
+policy:
+  allow_implicit_invocation: true

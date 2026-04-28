@@ -1,0 +1,8 @@
+interface:
+  display_name: "Vicky Init"
+  short_description: "Create the wiki scaffold and support files."
+  brand_color: "#386A8C"
+  default_prompt: "Use $init to prepare the Vicky wiki scaffold for this vault."
+
+policy:
+  allow_implicit_invocation: true

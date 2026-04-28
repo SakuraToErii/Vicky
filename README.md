@@ -37,6 +37,8 @@ templates/
 
 Engineering support stays under `.codex/`, `.tests/`, `.config/`, `.obsidian/`, and `.github/`.
 
+Codex skills follow the standard package shape: each skill has `SKILL.md`, optional `agents/openai.yaml`, and executable helpers under `scripts/`. Shared repo-local helpers live in `.codex/lib/vicky/`.
+
 ## Workflow
 
 1. Add source files to `raw/papers/`, `raw/web/`, or `raw/inbox/`.
@@ -73,7 +75,7 @@ The script creates `.venv`, installs dependencies, writes `.env` from `.config/.
 Run the strict vault lint:
 
 ```bash
-.venv/bin/python .codex/skills/check/tools/lint.py --wiki-dir wiki --json
+.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json
 ```
 
 Run the test suite:
@@ -93,9 +95,22 @@ obsidian files
 Repo-local graph diagnostics:
 
 ```bash
-.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki orphans
-.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki deadends
+.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki orphans
+.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki deadends
 ```
+
+Other useful skill scripts:
+
+```bash
+.venv/bin/python .codex/skills/init/scripts/init_wiki.py --project-root .
+.venv/bin/python .codex/skills/init/scripts/slug.py "Flash Attention"
+.venv/bin/python .codex/skills/ask/scripts/frontmatter_find.py wiki concepts --maturity working
+.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "Gradient Descent"
+```
+
+## Legacy CLI Mapping
+
+The old `.tools/research_wiki.py` surface is now split by skill: init and slug live in `init/scripts/`, frontmatter lookup lives in `ask/scripts/`, near-duplicate checks live in `ingest/scripts/`, graph diagnostics live in `check/scripts/`, and reset lives in `reset/scripts/`. Log appends, property reads, property writes, file listing, search, links, backlinks, outlines, renames, and moves use Obsidian CLI.
 
 ## Obsidian Notes
 

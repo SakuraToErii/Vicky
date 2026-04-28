@@ -19,10 +19,10 @@ Run the vault health checks.
    - `obsidian properties counts format=json`
    - `obsidian files folder=wiki ext=md total`
 2. Run repo-local graph diagnostics:
-   - `./.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki/ orphans`
-   - `./.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki/ deadends`
-3. Run strict schema lint with `./.venv/bin/python .codex/skills/check/tools/lint.py --wiki-dir wiki/ --json`.
-4. If `--fix` is present, run `./.venv/bin/python .codex/skills/check/tools/lint.py --wiki-dir wiki/ --fix --json`.
+   - `./.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki/ orphans`
+   - `./.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki/ deadends`
+3. Run strict schema lint with `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki/ --json`.
+4. If `--fix` is present, run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki/ --fix --json`.
 5. Report unresolved links, orphan pages, dead-end pages, duplicate slugs, missing fields, invalid values, missing source backlinks, and relation property/body drift.
 6. Confirm default Base files exist under `wiki/bases/` and restore them with `--fix` when missing or malformed.
 7. Append a log line with `obsidian append file=log content="## [YYYY-MM-DD] check | report: <red> red, <yellow> yellow, <blue> blue"`.

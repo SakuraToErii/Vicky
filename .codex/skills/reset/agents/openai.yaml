@@ -1,0 +1,8 @@
+interface:
+  display_name: "Vicky Reset"
+  short_description: "Preview and apply guarded vault resets."
+  brand_color: "#7E4E9F"
+  default_prompt: "Use $reset to preview and apply a guarded Vicky vault reset."
+
+policy:
+  allow_implicit_invocation: true

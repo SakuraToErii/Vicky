@@ -12,9 +12,9 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LIB_DIR = PROJECT_ROOT / ".codex" / "lib"
-TOOLS_DIR = PROJECT_ROOT / ".codex" / "skills" / "ingest" / "tools"
+SCRIPTS_DIR = PROJECT_ROOT / ".codex" / "skills" / "ingest" / "scripts"
 sys.path.insert(0, str(LIB_DIR))
-sys.path.insert(0, str(TOOLS_DIR))
+sys.path.insert(0, str(SCRIPTS_DIR))
 from fetch_s2 import (
     BASE_URL,
     FIELDS,
@@ -351,7 +351,7 @@ class TestCLI:
 
     def test_cli_help(self):
         result = subprocess.run(
-            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "--help"],
+            [sys.executable, str(SCRIPTS_DIR / "fetch_s2.py"), "--help"],
             capture_output=True,
             text=True,
             cwd=str(PROJECT_ROOT),
@@ -361,7 +361,7 @@ class TestCLI:
 
     def test_cli_search_help(self):
         result = subprocess.run(
-            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "search", "--help"],
+            [sys.executable, str(SCRIPTS_DIR / "fetch_s2.py"), "search", "--help"],
             capture_output=True,
             text=True,
             cwd=str(PROJECT_ROOT),
@@ -371,7 +371,7 @@ class TestCLI:
 
     def test_cli_paper_help(self):
         result = subprocess.run(
-            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "paper", "--help"],
+            [sys.executable, str(SCRIPTS_DIR / "fetch_s2.py"), "paper", "--help"],
             capture_output=True,
             text=True,
             cwd=str(PROJECT_ROOT),
@@ -381,7 +381,7 @@ class TestCLI:
 
     def test_cli_citations_help(self):
         result = subprocess.run(
-            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "citations", "--help"],
+            [sys.executable, str(SCRIPTS_DIR / "fetch_s2.py"), "citations", "--help"],
             capture_output=True,
             text=True,
             cwd=str(PROJECT_ROOT),
@@ -390,7 +390,7 @@ class TestCLI:
 
     def test_cli_references_help(self):
         result = subprocess.run(
-            [sys.executable, str(TOOLS_DIR / "fetch_s2.py"), "references", "--help"],
+            [sys.executable, str(SCRIPTS_DIR / "fetch_s2.py"), "references", "--help"],
             capture_output=True,
             text=True,
             cwd=str(PROJECT_ROOT),
@@ -399,7 +399,7 @@ class TestCLI:
 
     def test_cli_no_command_fails(self):
         result = subprocess.run(
-            [sys.executable, str(TOOLS_DIR / "fetch_s2.py")],
+            [sys.executable, str(SCRIPTS_DIR / "fetch_s2.py")],
             capture_output=True,
             text=True,
             cwd=str(PROJECT_ROOT),

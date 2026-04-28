@@ -27,11 +27,14 @@ Treat `raw/` as user-owned input. Read from it and write to `wiki/`.
 
 `templates/` stores one Obsidian template per wiki page type. `.obsidian/templates.json` points Obsidian CLI at `templates/`.
 
-`.codex/` contains skills, skill-local tools, and shared helper code:
+`.codex/` contains Codex skills, skill-local scripts, and shared helper code:
 
 - `.codex/skills/*/SKILL.md` holds workflow instructions
-- `.codex/skills/*/tools/` holds tools owned by one skill
-- `.codex/lib/vicky/` holds shared schema, frontmatter, markdown, and support-file helpers
+- `.codex/skills/*/scripts/` holds executable helpers owned by one skill
+- `.codex/skills/*/agents/openai.yaml` holds optional product metadata for the skill package
+- `.codex/lib/vicky/` holds repo-local shared schema, frontmatter, markdown, slug, and support-file helpers
+
+The shared `.codex/lib/vicky/` package is a Vicky repo convention. Skill scripts add it to `sys.path` so duplicated schema logic stays centralized while each skill keeps executable helpers in the standard `scripts/` directory.
 
 ## Page And Link Rules
 
@@ -125,8 +128,8 @@ Run commands from the vault root. Existing notes use `file=<slug>`. Exact destin
 Repo-local graph checks use skill tools:
 
 ```bash
-.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki orphans
-.venv/bin/python .codex/skills/check/tools/wiki_graph.py wiki deadends
+.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki orphans
+.venv/bin/python .codex/skills/check/scripts/wiki_graph.py wiki deadends
 ```
 
 ## Log Format
@@ -150,11 +153,34 @@ Use Obsidian CLI for vault reads, note creation, property edits, search, link ch
 
 Use Python for:
 
-- strict lint rules: `.codex/skills/check/tools/lint.py`
-- repo-local wiki graph diagnostics: `.codex/skills/check/tools/wiki_graph.py`
-- Semantic Scholar metadata: `.codex/skills/ingest/tools/fetch_s2.py`
-- reset previews and guarded reset execution: `.codex/skills/reset/tools/reset_wiki.py`
+- strict lint rules: `.codex/skills/check/scripts/lint.py`
+- repo-local wiki graph diagnostics: `.codex/skills/check/scripts/wiki_graph.py`
+- frontmatter lookup fallback: `.codex/skills/ask/scripts/frontmatter_find.py`
+- deterministic scaffold setup and slugging: `.codex/skills/init/scripts/init_wiki.py`, `.codex/skills/init/scripts/slug.py`
+- pre-create duplicate checks: `.codex/skills/ingest/scripts/similar_pages.py`
+- Semantic Scholar metadata: `.codex/skills/ingest/scripts/fetch_s2.py`
+- reset previews and guarded reset execution: `.codex/skills/reset/scripts/reset_wiki.py`
 - tests and setup checks
+
+## Legacy Research Wiki Command Map
+
+The old monolithic `.tools/research_wiki.py` command surface is split by skill ownership:
+
+| Old command | Current owner |
+|---|---|
+| `init` | `.codex/skills/init/scripts/init_wiki.py` |
+| `slug` | `.codex/skills/init/scripts/slug.py` and `.codex/lib/vicky/slug.py` |
+| `find` | `.codex/skills/ask/scripts/frontmatter_find.py` |
+| `find-similar-concept` | `.codex/skills/ingest/scripts/similar_pages.py concept` |
+| `find-similar-theorem` | `.codex/skills/ingest/scripts/similar_pages.py theorem` |
+| `query orphans` / `query deadends` | `.codex/skills/check/scripts/wiki_graph.py` |
+| `log` | `obsidian append file=log content="..."` |
+| `read-meta` | `obsidian property:read file=<slug> name=<field>` |
+| `set-meta` | `obsidian property:set file=<slug> name=<field> value=<value> type=<type>` |
+| `stats` | `obsidian files folder=wiki ext=md total` and Bases views |
+| `maturity` | `wiki/bases/Semantic Relations.base` review views |
+| `transition` | `edit` skill status-property edits plus log entry |
+| `checkpoint-*` | `wiki/log.md` plus conversational ingest state; reset can clear legacy `wiki/.checkpoints/*.json` |
 
 ## Skills
 
