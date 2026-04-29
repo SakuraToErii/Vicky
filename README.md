@@ -60,7 +60,7 @@ Codex skills follow the standard package shape: each skill has `SKILL.md`, optio
 5. Ask questions against the maintained wiki through the repo-local `ask` skill.
 6. Run lint when the vault structure changes.
 
-New concept, theorem, and idea pages follow a fixed post-processing path: run duplicate checks before writing, finish one page at a time, fill source ancestry through `key_sources` or `relation_derived_from`, add the reverse source or related-page mention, append `wiki/log.md`, then finish with a clean lint run.
+New concept, theorem, and idea pages follow a fixed post-processing path: run duplicate checks before writing, finish one page at a time, fill source ancestry through `relation_derived_from`, add the reverse source or related-page mention, append `wiki/log.md`, then finish with a clean lint run. People pages keep source ancestry in `key_sources`.
 
 ## Semantic Graph
 
@@ -120,7 +120,7 @@ Other useful skill scripts:
 
 ```bash
 .venv/bin/python .codex/skills/ingest/scripts/slug.py "Flash Attention"
-.venv/bin/python .codex/skills/ask/scripts/frontmatter_find.py wiki concepts --maturity working
+.venv/bin/python .codex/skills/ask/scripts/frontmatter_find.py wiki ideas --priority '<3'
 .venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "Gradient Descent"
 .venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "Open Question"
 ```

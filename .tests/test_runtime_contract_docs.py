@@ -19,7 +19,8 @@ def test_agents_contract_covers_new_page_post_processing():
         'similar_pages.py wiki theorem "<title>"',
         'similar_pages.py wiki idea "<title>"',
         "key_sources",
-        "source-backed ideas",
+        "source-backed people",
+        "source-backed concepts, theorems, and ideas",
         "relation_derived_from",
         "wiki/log.md",
         ".codex/skills/check/scripts/lint.py --wiki-dir wiki --json",
@@ -32,8 +33,8 @@ def test_ingest_skill_requires_one_page_at_a_time_completion():
     for snippet in [
         "Process approved knowledge pages one at a time.",
         'similar_pages.py wiki idea "<title>"',
-        "add or confirm `key_sources` for concepts, theorems, and people",
-        "add source-backed ideas to `relation_derived_from`",
+        "add source-backed concepts, theorems, and ideas to `relation_derived_from`",
+        "add or confirm `key_sources` for people",
         "Append one log line",
         "Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json` as the completion signal",
     ]:
@@ -45,8 +46,8 @@ def test_edit_skill_requires_post_processing_and_lint():
     for snippet in [
         'similar_pages.py wiki idea "<title>"',
         "finish one page at a time through the full post-processing path",
-        "add `key_sources` for source-backed concepts, theorems, and people",
-        "add source-backed ideas to `relation_derived_from`",
+        "add `relation_derived_from` for source-backed concepts, theorems, and ideas",
+        "add `key_sources` for source-backed people",
         "wiki/log",
         ".codex/skills/check/scripts/lint.py --wiki-dir wiki --json",
     ]:

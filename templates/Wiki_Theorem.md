@@ -2,10 +2,7 @@
 title: "{{title}}"
 slug: ""
 tags: []
-aliases: []
 theorem_kind: theorem
-status: draft
-key_sources: []
 relation_derived_from: []
 relation_extends: []
 relation_supports: []

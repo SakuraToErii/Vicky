@@ -52,8 +52,6 @@ views:
       - file.path
       - formula.page_type
       - tags
-      - maturity
-      - status
       - theorem_kind
       - key_sources
       - relation_derived_from
@@ -78,8 +76,6 @@ views:
       - file.path
       - formula.page_type
       - tags
-      - maturity
-      - status
       - key_sources
       - formula.source_count
       - formula.relation_count
@@ -108,9 +104,6 @@ views:
     order:
       - formula.display_title
       - theorem_kind
-      - maturity
-      - status
-      - key_sources
       - relation_derived_from
       - relation_extends
       - relation_supports
@@ -129,7 +122,6 @@ views:
       direction: ASC
     order:
       - formula.display_title
-      - status
       - priority
       - tags
       - relation_derived_from

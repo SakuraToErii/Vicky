@@ -53,10 +53,10 @@ class TestMissingFields:
         issues = lint_mod.check_missing_fields(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert any("source_path" in issue.message for issue in issues)
 
-    def test_theorem_missing_status(self, wiki_dir):
-        _write_page(wiki_dir, "theorems", "bound", ['title: "Bound"', "slug: bound", "theorem_kind: theorem", "key_sources: [paper-a]"])
+    def test_idea_missing_priority(self, wiki_dir):
+        _write_page(wiki_dir, "ideas", "open-question", ['title: "Open Question"', "slug: open-question", "tags: [ml]"])
         issues = lint_mod.check_missing_fields(wiki_dir, lint_mod.find_all_pages(wiki_dir))
-        assert any("status" in issue.message for issue in issues)
+        assert any("priority" in issue.message for issue in issues)
 
 
 class TestBrokenLinks:
@@ -76,7 +76,7 @@ class TestBrokenLinks:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
+            ['title: "Concept A"', "slug: concept-a", "tags: []"],
             "![[Current Page Neighbors.base#Semantic neighbors]]",
         )
         issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
@@ -87,7 +87,7 @@ class TestBrokenLinks:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
+            ['title: "Concept A"', "slug: concept-a", "tags: []"],
             "```md\n[[missing-page]]\n```",
         )
         issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
@@ -98,7 +98,7 @@ class TestBrokenLinks:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
+            ['title: "Concept A"', "slug: concept-a", "tags: []"],
             "<!-- [[missing-page]] -->",
         )
         issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
@@ -164,7 +164,7 @@ class TestSupportFiles:
             wiki_dir,
             "concepts",
             "shared-slug",
-            ['title: "Shared Slug"', "slug: shared-slug", "tags: [ml]", "maturity: working", "key_sources: []"],
+            ['title: "Shared Slug"', "slug: shared-slug", "tags: [ml]"],
         )
         issues = lint_mod.run_lint(wiki_dir)
         assert any(issue.category == "duplicate-slug" for issue in issues)
@@ -190,7 +190,7 @@ class TestSlugField:
             wiki_dir,
             "concepts",
             "flash-attention",
-            ['title: "Flash Attention"', "slug: flash-attention-v2", "tags: [attention]", "maturity: working", "key_sources: []"],
+            ['title: "Flash Attention"', "slug: flash-attention-v2", "tags: [attention]"],
         )
         issues = lint_mod.run_lint(wiki_dir)
         assert any(issue.category == "slug-field" for issue in issues)
@@ -207,7 +207,7 @@ class TestFieldValues:
             wiki_dir,
             "theorems",
             "bound",
-            ['title: "Bound"', "slug: bound", "theorem_kind: miracle", "status: draft", "key_sources: [paper-a]", "tags: [ml]"],
+            ['title: "Bound"', "slug: bound", "theorem_kind: miracle", "tags: [ml]", 'relation_derived_from: ["[[paper-a]]"]'],
         )
         issues = lint_mod.check_field_values(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert any("theorem_kind" in issue.message for issue in issues)
@@ -226,7 +226,7 @@ class TestCrossReferences:
             wiki_dir,
             "concepts",
             "flash-attention",
-            ['title: "Flash Attention"', "slug: flash-attention", "tags: [attention]", "maturity: working", "key_sources: [paper-a]"],
+            ['title: "Flash Attention"', "slug: flash-attention", "tags: [attention]", 'relation_derived_from: ["[[paper-a]]"]'],
         )
         issues = lint_mod.check_cross_references(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert any("does not link back" in issue.message for issue in issues)
@@ -243,7 +243,7 @@ class TestCrossReferences:
             wiki_dir,
             "concepts",
             "flash-attention",
-            ['title: "Flash Attention"', "slug: flash-attention", "tags: [attention]", "maturity: working", "key_sources: [paper-a]"],
+            ['title: "Flash Attention"', "slug: flash-attention", "tags: [attention]", 'relation_derived_from: ["[[paper-a]]"]'],
         )
         issues = lint_mod.run_lint(wiki_dir)
         fixes = lint_mod.apply_fixes(wiki_dir, issues, dry_run=False)
@@ -251,7 +251,7 @@ class TestCrossReferences:
         assert "[[flash-attention]]" in content
         assert fixes
 
-    def test_block_list_key_sources_are_checked(self, wiki_dir):
+    def test_block_list_relation_sources_are_checked(self, wiki_dir):
         _write_page(
             wiki_dir,
             "sources",
@@ -267,13 +267,30 @@ class TestCrossReferences:
                 'title: "Flash Attention"',
                 "slug: flash-attention",
                 "tags: [attention]",
-                "maturity: working",
-                "key_sources:",
-                "  - paper-a",
+                "relation_derived_from:",
+                '  - "[[paper-a]]"',
             ],
         )
         issues = lint_mod.check_cross_references(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert any("does not link back" in issue.message for issue in issues)
+
+    def test_relation_derived_from_non_source_does_not_require_source_backlink(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "base-concept",
+            ['title: "Base Concept"', "slug: base-concept", "tags: [ml]"],
+            "## Relations\n",
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "child-concept",
+            ['title: "Child Concept"', "slug: child-concept", "tags: [ml]", 'relation_derived_from: ["[[base-concept]]"]'],
+            "## Relations\n\n- Derived from [[base-concept]]: specializes it.\n",
+        )
+        issues = lint_mod.check_cross_references(wiki_dir, lint_mod.find_all_pages(wiki_dir))
+        assert not issues
 
 
 class TestRelationConsistency:
@@ -292,8 +309,6 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
-                "maturity: working",
-                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n",
@@ -312,7 +327,7 @@ class TestRelationConsistency:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: [ml]", "maturity: working", "key_sources: [paper-a]"],
+            ['title: "Concept A"', "slug: concept-a", "tags: [ml]"],
             "## Relations\n\n- Derived from [[paper-a]]: uses its setup.\n",
         )
         issues = lint_mod.run_lint(wiki_dir)
@@ -333,8 +348,6 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
-                "maturity: working",
-                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n- Derived from [[paper-a]]: uses its setup.\n",
@@ -357,8 +370,6 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
-                "maturity: working",
-                "key_sources: [paper-a]",
                 "relation_derived_from:",
                 '  - "[[paper-a]]"',
             ],
@@ -383,8 +394,6 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
-                "maturity: working",
-                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n- Derived from [[paper-a#Summary]]: cites the relevant section.\n",
@@ -407,8 +416,6 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
-                "maturity: working",
-                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n```md\n- Derived from [[paper-a]]\n```\n",

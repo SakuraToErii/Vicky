@@ -23,8 +23,8 @@ Apply a targeted vault edit.
 8. For renames and moves, use `obsidian rename file=<slug> name=<new-name>` or `obsidian move file=<slug> to="wiki/<type>/<slug>.md"`.
 9. Before creating a concept, theorem, or idea page through an edit request, run `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki concept "<title>"`, `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki theorem "<title>"`, or `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"`.
 10. When an edit creates a new page or splits one page into several pages, finish one page at a time through the full post-processing path:
-    - add `key_sources` for source-backed concepts, theorems, and people
-    - add source-backed ideas to `relation_derived_from`
+    - add `relation_derived_from` for source-backed concepts, theorems, and ideas
+    - add `key_sources` for source-backed people
     - add the necessary `relation_*` properties
     - mirror every stable semantic edge in `## Relations`
     - add the reverse source mention or related-page mention in body text or a related section

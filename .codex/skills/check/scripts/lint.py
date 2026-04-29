@@ -366,13 +366,14 @@ def check_cross_references(wiki_dir: Path, pages: dict[str, Path]) -> list[LintI
         if page_type not in {"concepts", "theorems", "people"}:
             continue
 
-        field_name = "key_sources"
+        field_name = "key_sources" if page_type == "people" else "relation_derived_from"
         for source_slug in (_normalize_link_target(value) for value in _as_list(frontmatter.get(field_name))):
             if not source_slug:
                 continue
             source_path = wiki_dir / "sources" / f"{source_slug}.md"
             if not source_path.exists():
-                issues.append(LintIssue("🟡", "xref", rel_path, f"{field_name} has {source_slug} but sources/{source_slug}.md is missing"))
+                if page_type == "people":
+                    issues.append(LintIssue("🟡", "xref", rel_path, f"{field_name} has {source_slug} but sources/{source_slug}.md is missing"))
                 continue
             source_content = source_path.read_text(encoding="utf-8")
             if f"[[{slug}]]" not in source_content:

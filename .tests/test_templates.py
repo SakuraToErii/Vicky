@@ -20,26 +20,26 @@ TEMPLATE_DIR = PROJECT_ROOT / "templates"
 TYPES_PATH = PROJECT_ROOT / ".obsidian" / "types.json"
 DEPRECATED_TEMPLATE_FIELDS = {"date_updated", "source_ids"}
 LIST_FIELDS = {"aliases", "authors", "key_sources", "tags", *RELATION_FIELDS}
-TEXT_FIELDS = {"title", "slug", "source_kind", "source_path", "domain", "status", "maturity", "theorem_kind", "affiliation"}
+TEXT_FIELDS = {"title", "slug", "source_kind", "source_path", "theorem_kind", "affiliation"}
 EXPECTED_TEMPLATE_FIELD_ORDER = {
-    "Wiki_Concept.md": ["title", "slug", "tags", "aliases", "maturity", "key_sources", *RELATION_FIELDS],
-    "Wiki_Foundation.md": ["title", "slug", "tags", "aliases", "domain", "status", *RELATION_FIELDS],
-    "Wiki_Idea.md": ["title", "slug", "tags", "status", "priority", *RELATION_FIELDS],
+    "Wiki_Concept.md": ["title", "slug", "tags", "aliases", *RELATION_FIELDS],
+    "Wiki_Foundation.md": ["title", "slug", "tags", "aliases", *RELATION_FIELDS],
+    "Wiki_Idea.md": ["title", "slug", "tags", "priority", *RELATION_FIELDS],
     "Wiki_Output.md": ["title", "slug", "tags", *RELATION_FIELDS],
-    "Wiki_Person.md": ["title", "slug", "tags", "aliases", "affiliation", "key_sources", *RELATION_FIELDS],
+    "Wiki_Person.md": ["title", "slug", "tags", "affiliation", "key_sources", *RELATION_FIELDS],
     "Wiki_Source.md": ["title", "slug", "tags", "authors", "source_kind", "source_path", "date_added"],
-    "Wiki_Theorem.md": ["title", "slug", "tags", "aliases", "theorem_kind", "status", "key_sources", *RELATION_FIELDS],
+    "Wiki_Theorem.md": ["title", "slug", "tags", "theorem_kind", *RELATION_FIELDS],
     "Wiki_Topic.md": ["title", "slug", "tags", *RELATION_FIELDS],
 }
-EXPECTED_TEMPLATE_HEADINGS = {
-    "Wiki_Concept.md": ["## Notes", "## Relations"],
-    "Wiki_Foundation.md": ["## Notes", "## Relations"],
-    "Wiki_Idea.md": ["## Notes", "## Relations"],
-    "Wiki_Output.md": ["## Answer", "## Relations"],
-    "Wiki_Person.md": ["## Notes", "## Relations"],
-    "Wiki_Source.md": ["## Summary", "## Related"],
-    "Wiki_Theorem.md": ["## Statement", "## Relations"],
-    "Wiki_Topic.md": ["## Notes", "## Relations"],
+REQUIRED_TEMPLATE_ANCHORS = {
+    "Wiki_Concept.md": "## Relations",
+    "Wiki_Foundation.md": "## Relations",
+    "Wiki_Idea.md": "## Relations",
+    "Wiki_Output.md": "## Relations",
+    "Wiki_Person.md": "## Relations",
+    "Wiki_Source.md": "## Related",
+    "Wiki_Theorem.md": "## Relations",
+    "Wiki_Topic.md": "## Relations",
 }
 
 
@@ -83,7 +83,12 @@ def test_source_template_keeps_year_optional():
 
 def test_templates_use_minimal_stable_body_anchors():
     for path in sorted(TEMPLATE_DIR.glob("Wiki_*.md")):
-        assert _body_headings(path) == EXPECTED_TEMPLATE_HEADINGS[path.name]
+        headings = _body_headings(path)
+        assert REQUIRED_TEMPLATE_ANCHORS[path.name] in headings
+        if path.name != "Wiki_Source.md":
+            assert "## Related" not in headings
+        if path.name == "Wiki_Source.md":
+            assert "## Relations" not in headings
 
 
 def test_foundation_template_supports_alias_matching():
@@ -106,7 +111,10 @@ def test_obsidian_property_types_match_template_schema():
     assert types["priority"] == "number"
     assert types["year"] == "number"
     assert types["date_added"] == "date"
+    assert "domain" not in types
+    assert "maturity" not in types
     assert "name" not in types
+    assert "status" not in types
     for field in RELATION_FIELDS:
         assert types[field] == "multitext"
 

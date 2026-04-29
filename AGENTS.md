@@ -71,8 +71,8 @@ Minimum completion path:
    - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"`
 2. Create from the matching template and edit the exact target markdown file.
 3. Fill semantic follow-up:
-   - for source-backed concepts, theorems, and people, maintain `key_sources`
-   - for source-backed ideas, add the source page to `relation_derived_from`
+   - for source-backed concepts, theorems, and ideas, add the source page to `relation_derived_from`
+   - for source-backed people, maintain `key_sources`
    - add the necessary `relation_*` properties
    - mirror every stable semantic edge in `## Relations`
    - add the reverse source mention or related-page mention in body text or a related section

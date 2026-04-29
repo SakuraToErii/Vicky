@@ -10,6 +10,4 @@ relation_uses: []
 relation_compares_with: []
 ---
 
-## Notes
-
 ## Relations

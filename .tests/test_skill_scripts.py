@@ -49,13 +49,13 @@ def test_frontmatter_find_filters_lists_and_wikilinks(tmp_path):
         wiki,
         "concepts",
         "flash-attention",
-        'title: "Flash Attention"\nslug: flash-attention\ntags: [attention]\nmaturity: working\nkey_sources: [paper-a]\nrelation_derived_from: ["[[paper-a]]"]',
+        'title: "Flash Attention"\nslug: flash-attention\ntags: [attention]\nrelation_derived_from: ["[[paper-a]]"]',
     )
     _write_page(
         wiki,
         "concepts",
         "lora",
-        'title: "LoRA"\nslug: lora\ntags: [adaptation]\nmaturity: seed\nkey_sources: [paper-b]',
+        'title: "LoRA"\nslug: lora\ntags: [adaptation]\nrelation_derived_from: ["[[paper-b]]"]',
     )
 
     matches = frontmatter_find.find_entities(wiki, "concepts", [("relation_derived_from", "paper-a")])
@@ -68,7 +68,7 @@ def test_frontmatter_find_cli(tmp_path):
         wiki,
         "ideas",
         "open-question",
-        'title: "Open Question"\nslug: open-question\nstatus: working\ntags: [ml]\npriority: 2',
+        'title: "Open Question"\nslug: open-question\ntags: [ml]\npriority: 2',
     )
     result = subprocess.run(
         [sys.executable, str(ASK_SCRIPTS / "frontmatter_find.py"), str(wiki), "ideas", "--priority", "<3"],
@@ -83,12 +83,12 @@ def test_frontmatter_find_cli(tmp_path):
 
 def test_similar_pages_prefers_foundations(tmp_path):
     wiki = tmp_path / "wiki"
-    _write_page(wiki, "foundations", "gradient-descent", 'title: "Gradient Descent"\nslug: gradient-descent\ndomain: optimization\nstatus: canonical')
+    _write_page(wiki, "foundations", "gradient-descent", 'title: "Gradient Descent"\nslug: gradient-descent\ntags: [optimization]')
     _write_page(
         wiki,
         "concepts",
         "stochastic-gradient-descent",
-        'title: "Stochastic Gradient Descent"\nslug: stochastic-gradient-descent\ntags: [optimization]\nmaturity: working\nkey_sources: []',
+        'title: "Stochastic Gradient Descent"\nslug: stochastic-gradient-descent\ntags: [optimization]\nrelation_derived_from: []',
     )
     matches = similar_pages.find_similar_concept(wiki, "Gradient Descent")
     assert matches[0]["entity_type"] == "foundation"
@@ -101,7 +101,7 @@ def test_similar_pages_cli_theorem(tmp_path):
         wiki,
         "theorems",
         "banach-fixed-point",
-        'title: "Banach Fixed Point Theorem"\nslug: banach-fixed-point\ntheorem_kind: theorem\nstatus: stable\nkey_sources: []\ntags: [analysis]',
+        'title: "Banach Fixed Point Theorem"\nslug: banach-fixed-point\ntheorem_kind: theorem\ntags: [analysis]\nrelation_derived_from: []',
     )
     result = subprocess.run(
         [sys.executable, str(INGEST_SCRIPTS / "similar_pages.py"), str(wiki), "theorem", "Banach Fixed Point Theorem"],
@@ -120,7 +120,7 @@ def test_similar_pages_cli_idea(tmp_path):
         wiki,
         "ideas",
         "open-questions-in-linear-attention",
-        'title: "Open Questions in Linear Attention"\nslug: open-questions-in-linear-attention\nstatus: working\npriority: 2\ntags: [attention, open-question]',
+        'title: "Open Questions in Linear Attention"\nslug: open-questions-in-linear-attention\npriority: 2\ntags: [attention, open-question]',
     )
     result = subprocess.run(
         [sys.executable, str(INGEST_SCRIPTS / "similar_pages.py"), str(wiki), "idea", "Open Question in Linear Attention"],

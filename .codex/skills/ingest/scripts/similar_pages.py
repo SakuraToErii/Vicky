@@ -65,15 +65,15 @@ def _scan_similar(entity_dir: Path, entity_type: str, candidate_names: list[str]
 
 def find_similar_concept(wiki_root: Path, candidate_title: str, candidate_aliases: list[str] | None = None) -> list[dict]:
     candidate_names = [candidate_title] + [alias for alias in (candidate_aliases or []) if alias]
-    matches = _scan_similar(wiki_root / "foundations", "foundation", candidate_names, "key_sources")
-    matches.extend(_scan_similar(wiki_root / "concepts", "concept", candidate_names, "key_sources"))
+    matches = _scan_similar(wiki_root / "foundations", "foundation", candidate_names, "relation_derived_from")
+    matches.extend(_scan_similar(wiki_root / "concepts", "concept", candidate_names, "relation_derived_from"))
     matches.sort(key=lambda item: (0 if item["entity_type"] == "foundation" else 1, -item["score"], item["slug"]))
     return matches
 
 
 def find_similar_theorem(wiki_root: Path, candidate_title: str, candidate_aliases: list[str] | None = None) -> list[dict]:
     candidate_names = [candidate_title] + [alias for alias in (candidate_aliases or []) if alias]
-    return _scan_similar(wiki_root / "theorems", "theorem", candidate_names, "key_sources")
+    return _scan_similar(wiki_root / "theorems", "theorem", candidate_names, "relation_derived_from")
 
 
 def find_similar_idea(wiki_root: Path, candidate_title: str, candidate_aliases: list[str] | None = None) -> list[dict]:

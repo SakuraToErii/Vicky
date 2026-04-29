@@ -46,18 +46,16 @@ RELATION_DISPLAY_NAMES = {
 
 REQUIRED_FIELDS = {
     "sources": ["title", "slug", "source_kind", "source_path"],
-    "concepts": ["title", "slug", "tags", "maturity", "key_sources"],
+    "concepts": ["title", "slug", "tags"],
     "topics": ["title", "slug", "tags"],
     "people": ["title", "slug", "tags"],
-    "ideas": ["title", "slug", "status", "tags", "priority"],
-    "theorems": ["title", "slug", "theorem_kind", "status", "key_sources"],
-    "foundations": ["title", "slug", "domain", "status"],
+    "ideas": ["title", "slug", "tags", "priority"],
+    "theorems": ["title", "slug", "theorem_kind", "tags"],
+    "foundations": ["title", "slug", "tags"],
 }
 
 VALID_VALUES = {
     "sources.source_kind": {"paper", "blog", "chapter", "book", "web", "note", "other"},
-    "concepts.maturity": {"seed", "working", "stable", "archived"},
-    "ideas.status": {"fleeting", "working", "stable", "archived"},
     "ideas.priority": {"1", "2", "3", "4", "5"},
     "theorems.theorem_kind": {
         "definition",
@@ -70,18 +68,16 @@ VALID_VALUES = {
         "algorithm",
         "note",
     },
-    "theorems.status": {"draft", "stable", "historical"},
-    "foundations.status": {"canonical", "historical"},
 }
 
 FIELD_DEFAULTS = {
     "sources": {"source_kind": "other", "tags": "[]"},
-    "concepts": {"tags": "[]", "maturity": "seed", "key_sources": "[]"},
+    "concepts": {"tags": "[]"},
     "topics": {"tags": "[]"},
     "people": {"tags": "[]"},
-    "ideas": {"status": "fleeting", "tags": "[]", "priority": "3"},
-    "theorems": {"theorem_kind": "note", "status": "draft", "key_sources": "[]", "tags": "[]"},
-    "foundations": {"aliases": "[]", "status": "canonical"},
+    "ideas": {"tags": "[]", "priority": "3"},
+    "theorems": {"theorem_kind": "note", "tags": "[]"},
+    "foundations": {"aliases": "[]", "tags": "[]"},
 }
 
 PAGE_TYPE_FORMULA = 'file.folder.replace("wiki/", "")'
@@ -171,8 +167,6 @@ views:
       - file.path
       - formula.page_type
       - tags
-      - maturity
-      - status
       - theorem_kind
       - key_sources
 {_relation_order_lines()}
@@ -192,8 +186,6 @@ views:
       - file.path
       - formula.page_type
       - tags
-      - maturity
-      - status
       - key_sources
       - formula.source_count
       - formula.relation_count
@@ -220,9 +212,6 @@ views:
     order:
       - formula.display_title
       - theorem_kind
-      - maturity
-      - status
-      - key_sources
 {_relation_order_lines(fields=["relation_derived_from", "relation_extends", "relation_supports", "relation_uses", "relation_compares_with"])}
       - formula.relation_count
   - type: table
@@ -235,7 +224,6 @@ views:
       direction: ASC
     order:
       - formula.display_title
-      - status
       - priority
       - tags
 {_relation_order_lines(fields=["relation_derived_from", "relation_supports", "relation_compares_with"])}
