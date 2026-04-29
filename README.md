@@ -83,7 +83,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-The script checks required CLIs, creates `.venv`, installs dependencies, verifies Python packages, writes `.env` from `.config/.env.example`, and writes `.codex/settings.local.json` from the template.
+The script checks required CLIs, creates `.venv`, installs runtime and test dependencies, verifies Python packages, writes `.env` from `.config/.env.example`, and writes `.codex/settings.local.json` from the template.
 
 `SEMANTIC_SCHOLAR_API_KEY` is optional and useful for source metadata enrichment.
 

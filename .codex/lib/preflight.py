@@ -17,6 +17,7 @@ COMMAND_LABELS = {
 }
 
 MODULE_LABELS = {
+    "pytest": "pytest",
     "requests": "requests",
     "yaml": "PyYAML",
 }

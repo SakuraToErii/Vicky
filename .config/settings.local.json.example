@@ -1,12 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(*)",
       "Read(*)",
       "Edit(*)",
-      "WebSearch",
-      "WebFetch(*)",
-      "MCP(*)"
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(./.venv/bin/python *)",
+      "Bash(.venv/bin/python *)",
+      "Bash(obsidian *)",
+      "Bash(rg *)"
     ]
   },
   "enableAllProjectMcpServers": false

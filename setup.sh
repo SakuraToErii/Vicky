@@ -63,12 +63,12 @@ fi
 
 info "Installing dependencies..."
 "$VENV_PYTHON" -m pip install --upgrade pip >/dev/null
-"$VENV_PYTHON" -m pip install "requests>=2.28.0" "PyYAML>=6.0" >/dev/null
+"$VENV_PYTHON" -m pip install "requests>=2.28.0" "PyYAML>=6.0" "pytest>=8.0" >/dev/null
 ok "Dependencies installed"
 
 echo ""
 info "Verifying Python packages..."
-"$VENV_PYTHON_ABS" .codex/lib/preflight.py modules requests yaml
+"$VENV_PYTHON_ABS" .codex/lib/preflight.py modules requests yaml pytest
 ok "Python packages available"
 
 echo ""
