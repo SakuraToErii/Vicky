@@ -85,7 +85,8 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 16. Maintain semantic relation properties with `obsidian property:set file=<slug> name=<relation_field> value="[[target-slug]]"` for single relation targets. For multi-target relation fields, update the frontmatter list and verify with `obsidian property:read`.
 17. Mirror every stable relation property in `## Relations` with a short evidence sentence.
 18. Complete the reverse update immediately after writing the page:
-   - add or confirm `key_sources`
+   - add or confirm `key_sources` for concepts, theorems, and people
+   - add source-backed ideas to `relation_derived_from`
    - add the reverse source mention or related-page mention in body text or a related section
    - confirm the source or related page points back to the new page when that page type expects a reverse update
 19. Verify the body edit with `git diff -- <exact-target-path>` instead of rereading the whole file when the page was created in this turn.
@@ -101,6 +102,7 @@ Turn one prepared source into a source page plus user-approved knowledge-page up
 - `wiki/sources/` is the automatic citation anchor for raw files.
 - Create or update non-source knowledge pages only when the user has named the target or approved the proposal.
 - Maintain backlinks from approved concepts, theorems, and people through `key_sources`.
+- Maintain source-backed idea ancestry through `relation_derived_from` and `## Relations`.
 - Use `relation_*` properties for machine-searchable semantic edges and `## Relations` for human-readable evidence.
 - Treat the six listed `relation_*` fields as the frozen relation contract.
 - Use Bases for relation browsing, filtering, and manual review.

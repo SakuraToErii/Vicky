@@ -60,7 +60,7 @@ Codex skills follow the standard package shape: each skill has `SKILL.md`, optio
 5. Ask questions against the maintained wiki through the repo-local `ask` skill.
 6. Run lint when the vault structure changes.
 
-New concept, theorem, and idea pages follow a fixed post-processing path: run duplicate checks before writing, finish one page at a time, fill `key_sources` and `relation_*`, add the reverse source or related-page mention, append `wiki/log.md`, then finish with a clean lint run.
+New concept, theorem, and idea pages follow a fixed post-processing path: run duplicate checks before writing, finish one page at a time, fill source ancestry through `key_sources` or `relation_derived_from`, add the reverse source or related-page mention, append `wiki/log.md`, then finish with a clean lint run.
 
 ## Semantic Graph
 

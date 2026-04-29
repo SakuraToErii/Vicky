@@ -18,6 +18,10 @@ import schema as schema_mod
 
 @pytest.fixture
 def project(tmp_path):
+    (tmp_path / "AGENTS.md").write_text("# Contract\n", encoding="utf-8")
+    (tmp_path / ".obsidian").mkdir()
+    (tmp_path / ".obsidian" / "types.json").write_text("{}", encoding="utf-8")
+
     wiki = tmp_path / "wiki"
     for name in rw.INDEXED_DIRS:
         (wiki / name).mkdir(parents=True)
@@ -55,6 +59,7 @@ def test_execute_wiki_removes_pages_and_keeps_gitkeep(project):
     result = rw.execute(project, ["wiki"])
     assert not (project / "wiki" / "sources" / "paper-a.md").exists()
     assert not (project / "wiki" / "outputs" / "comparison.md").exists()
+    assert "trash_dir" not in result
     assert (project / "wiki" / "sources" / ".gitkeep").exists()
     assert not (project / "wiki" / "index.md").exists()
     assert (project / "wiki" / "log.md").read_text(encoding="utf-8") == rw.LOG_TEMPLATE
@@ -63,11 +68,30 @@ def test_execute_wiki_removes_pages_and_keeps_gitkeep(project):
     assert result["reset_files"] == 1 + len(schema_mod.BASE_FILE_TEMPLATES)
 
 
-def test_execute_raw_removes_inbox_and_papers(project):
-    rw.execute(project, ["raw"])
+def test_raw_scope_requires_include_raw():
+    with pytest.raises(ValueError, match="--include-raw"):
+        rw.resolve_scopes("raw")
+
+
+def test_all_scope_excludes_raw_by_default():
+    assert "raw" not in rw.resolve_scopes("all")
+    assert "raw" in rw.resolve_scopes("all", include_raw=True)
+
+
+def test_execute_raw_moves_inbox_and_papers_to_trash(project):
+    result = rw.execute(project, rw.resolve_scopes("raw", include_raw=True))
     assert not (project / "raw" / "papers" / "paper-a.tex").exists()
     assert not (project / "raw" / "inbox" / "scratch.md").exists()
+    assert (project / result["trash_dir"] / "files" / "raw" / "papers" / "paper-a.tex").exists()
     assert (project / "raw" / "inbox" / ".gitkeep").exists()
+
+
+def test_rollback_restores_raw_files(project):
+    result = rw.execute(project, rw.resolve_scopes("raw", include_raw=True))
+    rollback = rw.rollback(project, result["trash_dir"])
+    assert rollback["restored_files"] > 0
+    assert (project / "raw" / "papers" / "paper-a.tex").exists()
+    assert (project / "raw" / "inbox" / "scratch.md").exists()
 
 
 def test_execute_log_resets_template(project):
@@ -84,4 +108,5 @@ def test_cli_dry_run(project):
     )
     payload = json.loads(result.stdout)
     assert payload["status"] == "plan"
+    assert payload["plan_hash"]
     assert (project / "wiki" / "sources" / "paper-a.md").exists()
