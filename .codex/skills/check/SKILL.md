@@ -12,28 +12,29 @@ Run the vault health checks.
 - optional `--fix`
 - optional `--dry-run`
 
+## References
+
+- `AGENTS.md` for relation fields, page homes, and support-file expectations
+
 ## Workflow
 
-1. Run Obsidian CLI diagnostics first:
+1. Run Obsidian CLI diagnostics:
    - `obsidian unresolved verbose format=json`
    - `obsidian properties counts format=json`
    - `obsidian files folder=wiki ext=md total`
-2. Run graph diagnostics through Obsidian CLI plus path filters:
+2. Run graph diagnostics with path filters:
    - `obsidian orphans | rg '^wiki/(sources|concepts|theorems|foundations|people|ideas|topics|outputs)/' | rg -v '^wiki/outputs/' || true`
    - `obsidian deadends | rg '^wiki/(sources|concepts|theorems|foundations|people|ideas|topics|outputs)/' | rg -v '^wiki/outputs/' || true`
-3. Run strict schema lint with `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki/ --json`.
-4. If `--fix` is present, run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki/ --fix --json`.
-5. Report unresolved links, orphan pages, dead-end pages, duplicate slugs, missing fields, invalid values, missing source backlinks, and relation property/body drift.
-6. Confirm default Base files exist under `wiki/bases/` and restore them with `--fix` when missing or malformed.
-7. Append a log line with `obsidian append file=log content="## [YYYY-MM-DD] check | report: <red> red, <yellow> yellow, <blue> blue"`.
+3. Run strict schema lint with `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki/ --json`; add `--fix` for deterministic repairs when requested.
+4. Report unresolved links, orphan pages, dead-end pages, duplicate slugs, missing fields, invalid values, missing source backlinks, relation property/body drift, and Base-file status.
+5. Append a log line with `obsidian append file=log content="## [YYYY-MM-DD] check | report: <red> red, <yellow> yellow, <blue> blue"`.
 
 ## Constraints
 
-- Default mode is report-only.
-- `--fix` should stay limited to deterministic repairs.
-- Relation fields are semantic graph edges. Every relation property should point at an existing page and have a matching `## Relations` explanation.
-- Treat `relation_derived_from`, `relation_extends`, `relation_supports`, `relation_contradicts`, `relation_uses`, and `relation_compares_with` as the frozen relation contract.
+- Default mode reports findings.
+- `--fix` applies deterministic repairs.
+- Relation properties point at existing pages and have matching `## Relations` explanations.
 - Default Bases are support files for semantic relation review.
 - Obsidian CLI diagnostics are the first pass; `lint.py` is the strict rule pass.
-- Orphan and dead-end reporting should stay scoped to the Vicky knowledge-page folders.
+- Orphan and dead-end reporting stays scoped to the Vicky knowledge-page folders.
 - Empty filtered output means the graph is clean for that check.

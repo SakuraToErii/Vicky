@@ -16,15 +16,14 @@ Reset part of the vault after showing a concrete deletion plan with a hash.
 
 ## Workflow
 
-1. Run `./.venv/bin/python .codex/skills/reset/scripts/reset_wiki.py --scope <scope>` to print the plan and `plan_hash`.
-2. Show the plan to the user.
-3. After explicit confirmation, run `./.venv/bin/python .codex/skills/reset/scripts/reset_wiki.py --scope <scope> --yes --plan-hash <hash>`.
-4. Add `--include-raw` only when the user explicitly confirms raw input deletion.
-5. For `wiki` scope, confirm `wiki/bases/Semantic Relations.base` and `wiki/bases/Current Page Neighbors.base` were restored.
-6. Append a log line unless `log` was reset.
+1. Run `./.venv/bin/python .codex/skills/reset/scripts/reset_wiki.py --scope <scope>` and show the plan plus `plan_hash`.
+2. After explicit confirmation, run `./.venv/bin/python .codex/skills/reset/scripts/reset_wiki.py --scope <scope> --yes --plan-hash <hash>`.
+3. Add `--include-raw` for explicitly confirmed raw input deletion.
+4. For `wiki` scope, confirm `wiki/bases/Semantic Relations.base` and `wiki/bases/Current Page Neighbors.base` were restored.
+5. Append a log line for scopes that keep `wiki/log.md`.
 
 ## Constraints
 
-- Always show the deletion plan first.
+- Show the deletion plan first.
 - Reset execution verifies `AGENTS.md`, `.obsidian/types.json`, and `wiki/` before moving files.
 - Raw reset moves deleted files to `.trash/vicky-reset-<timestamp>/`.

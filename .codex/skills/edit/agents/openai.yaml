@@ -1,8 +1,8 @@
 interface:
   display_name: "Vicky Edit"
-  short_description: "Apply scoped edits to raw or wiki pages."
+  short_description: "Apply scoped edits under wiki/."
   brand_color: "#7A5C36"
-  default_prompt: "Use $edit to make a targeted update in the Vicky vault."
+  default_prompt: "Use $edit to make a targeted update under wiki/ in the Vicky vault."
 
 policy:
   allow_implicit_invocation: true

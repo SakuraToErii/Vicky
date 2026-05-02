@@ -1,8 +1,8 @@
 interface:
   display_name: "Vicky Ingest"
-  short_description: "Turn one source into wiki updates."
+  short_description: "Turn one source into a Vicky source page."
   brand_color: "#B04848"
-  default_prompt: "Use $ingest to process one prepared source into Vicky wiki notes."
+  default_prompt: "Use $ingest to create or update one Vicky source page from a prepared source."
 
 policy:
   allow_implicit_invocation: true

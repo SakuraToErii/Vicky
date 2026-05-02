@@ -12,7 +12,9 @@ Vicky is a lightweight Obsidian-native LLM wiki.
 - `.codex/skills/` stores formal workflows.
 - `.codex/lib/` stores shared repo-local schema and helper code.
 
-Read from `raw/` when answering questions about source material. Write to `wiki/` only when the user asks for a skill workflow or explicitly asks to create, edit, save, reset, or check vault content.
+Read from `raw/` when answering questions about source material.  Explain the content to user using the Feynman technique, considering yourself as the author.
+
+Write to `wiki/` only when the user asks for a skill workflow or explicitly asks to create, edit, save, reset, or check vault content.
 
 ## Default Conversation Mode
 
@@ -22,7 +24,7 @@ In ordinary chat:
 
 - answer questions directly from the requested raw file, selected wiki pages, or the conversation context
 - explain uncertainty and cite local pages or file paths when useful
-- suggest candidate notes only when it helps the user's decision
+- create and edit long-term notes through explicit user targets
 - leave `wiki/`, `raw/`, templates, skills, and config unchanged
 
 Formal vault writes happen through skills:
@@ -75,7 +77,7 @@ Minimum completion path:
    - for source-backed people, maintain `key_sources`
    - add the necessary `relation_*` properties
    - mirror every stable semantic edge in `## Relations`
-   - add the reverse source mention or related-page mention in body text or a related section
+   - add the reverse source mention or related-page mention in body text or a related section.
 4. Append the `wiki/log.md` entry.
 5. Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json`.
 
@@ -109,6 +111,6 @@ Properties are the graph index. `## Relations` is the evidence context.
 
 Use Obsidian CLI for vault reads, note creation, property edits, search, link checks, log appends, renames, and moves.
 
-Use Python helpers for deterministic operations: lint, frontmatter lookup, slugging, duplicate checks, Semantic Scholar metadata, reset planning, setup, and tests.
+Use Python helpers by `.venv/bin/python` for deterministic operations: lint, frontmatter lookup, slugging, duplicate checks, Semantic Scholar metadata, reset planning, setup, and tests.
 
 Run commands from the vault root. Prefer `file=<slug>` for existing notes and `path=wiki/<type>/<slug>.md` for exact destinations.

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Find similar concept, idea, foundation, or theorem pages before creating new pages."""
+"""Find similar source, concept, idea, foundation, or theorem pages before creating new pages."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -15,6 +16,37 @@ if str(LIB_DIR) not in sys.path:
 
 from frontmatter import parse_frontmatter_file
 from slug_utils import phrase_match_score
+
+
+def _normalize_source_title(title: str) -> str:
+    return re.sub(r"[\s\-:：‐‑‒–—―]+", "", title.casefold())
+
+
+def find_similar_source(wiki_root: Path, candidate_title: str) -> list[dict]:
+    normalized_candidate = _normalize_source_title(candidate_title)
+    matches: list[dict] = []
+    if not normalized_candidate:
+        return matches
+    source_dir = wiki_root / "sources"
+    if not source_dir.exists():
+        return matches
+    for file_path in sorted(source_dir.glob("*.md")):
+        frontmatter = parse_frontmatter_file(file_path)
+        title = str(frontmatter.get("title", ""))
+        if _normalize_source_title(title) != normalized_candidate:
+            continue
+        matches.append(
+            {
+                "entity_type": "source",
+                "slug": file_path.stem,
+                "path": str(file_path.relative_to(wiki_root)),
+                "title": title,
+                "source_path": frontmatter.get("source_path", ""),
+                "score": 1.0,
+                "match_reason": "exact source title match ignoring case, spaces, hyphens, and colons",
+            }
+        )
+    return matches
 
 
 def _scan_similar(entity_dir: Path, entity_type: str, candidate_names: list[str], key_field: str) -> list[dict]:
@@ -84,14 +116,16 @@ def find_similar_idea(wiki_root: Path, candidate_title: str, candidate_aliases: 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("wiki_root")
-    parser.add_argument("kind", choices=["concept", "theorem", "idea"])
+    parser.add_argument("kind", choices=["source", "concept", "theorem", "idea"])
     parser.add_argument("title")
     parser.add_argument("--aliases", default="", help="Comma-separated aliases")
     args = parser.parse_args()
 
     aliases = [item.strip() for item in args.aliases.split(",") if item.strip()]
     wiki_root = Path(args.wiki_root)
-    if args.kind == "concept":
+    if args.kind == "source":
+        results = find_similar_source(wiki_root, args.title)
+    elif args.kind == "concept":
         results = find_similar_concept(wiki_root, args.title, aliases)
     elif args.kind == "idea":
         results = find_similar_idea(wiki_root, args.title, aliases)
