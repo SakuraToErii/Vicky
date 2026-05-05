@@ -27,7 +27,6 @@ Run the vault health checks.
    - `obsidian deadends | rg '^wiki/(sources|concepts|theorems|foundations|people|ideas|topics|outputs)/' | rg -v '^wiki/outputs/' || true`
 3. Run strict schema lint with `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki/ --json`; add `--fix` for deterministic repairs when requested.
 4. Report unresolved links, orphan pages, dead-end pages, duplicate slugs, missing fields, invalid values, missing source backlinks, relation property/body drift, and Base-file status.
-5. Append a log line with `obsidian append file=log content="## [YYYY-MM-DD] check | report: <red> red, <yellow> yellow, <blue> blue"`.
 
 ## Constraints
 

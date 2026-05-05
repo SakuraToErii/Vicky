@@ -9,7 +9,7 @@ Reset part of the vault after showing a concrete deletion plan with a hash.
 
 ## Inputs
 
-- `--scope wiki|raw|log|checkpoints|all`
+- `--scope wiki|raw|checkpoints|all`
 - `--include-raw` is required for any reset that includes `raw`
 - `--plan-hash <hash>` is required with `--yes`
 - `--rollback .trash/vicky-reset-<timestamp>` restores files moved by a raw reset
@@ -20,7 +20,6 @@ Reset part of the vault after showing a concrete deletion plan with a hash.
 2. After explicit confirmation, run `./.venv/bin/python .codex/skills/reset/scripts/reset_wiki.py --scope <scope> --yes --plan-hash <hash>`.
 3. Add `--include-raw` for explicitly confirmed raw input deletion.
 4. For `wiki` scope, confirm `wiki/bases/Semantic Relations.base` and `wiki/bases/Current Page Neighbors.base` were restored.
-5. Append a log line for scopes that keep `wiki/log.md`.
 
 ## Constraints
 

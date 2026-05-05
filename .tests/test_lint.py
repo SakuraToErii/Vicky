@@ -20,12 +20,11 @@ def test_relation_schema_is_frozen():
     assert schema_mod.RELATION_FIELDS == [
         "relation_derived_from",
         "relation_extends",
-        "relation_supports",
         "relation_contradicts",
         "relation_uses",
         "relation_compares_with",
     ]
-    assert "six existing fields" in schema_mod.RELATION_SCHEMA_CHANGE_POLICY
+    assert "five existing fields" in schema_mod.RELATION_SCHEMA_CHANGE_POLICY
 
 
 @pytest.fixture
@@ -53,10 +52,10 @@ class TestMissingFields:
         issues = lint_mod.check_missing_fields(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert any("source_path" in issue.message for issue in issues)
 
-    def test_idea_missing_priority(self, wiki_dir):
-        _write_page(wiki_dir, "ideas", "open-question", ['title: "Open Question"', "slug: open-question", "tags: [ml]"])
+    def test_theorem_missing_tags(self, wiki_dir):
+        _write_page(wiki_dir, "theorems", "bound", ['title: "Bound"', "slug: bound", "theorem_kind: theorem"])
         issues = lint_mod.check_missing_fields(wiki_dir, lint_mod.find_all_pages(wiki_dir))
-        assert any("priority" in issue.message for issue in issues)
+        assert any("tags" in issue.message for issue in issues)
 
 
 class TestBrokenLinks:
@@ -76,7 +75,7 @@ class TestBrokenLinks:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: []"],
+            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
             "![[Current Page Neighbors.base#Semantic neighbors]]",
         )
         issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
@@ -87,7 +86,7 @@ class TestBrokenLinks:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: []"],
+            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
             "```md\n[[missing-page]]\n```",
         )
         issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
@@ -98,7 +97,7 @@ class TestBrokenLinks:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: []"],
+            ['title: "Concept A"', "slug: concept-a", "tags: []", "maturity: seed", "key_sources: []"],
             "<!-- [[missing-page]] -->",
         )
         issues, _ = lint_mod.check_broken_links(wiki_dir, lint_mod.find_all_pages(wiki_dir))
@@ -107,14 +106,15 @@ class TestBrokenLinks:
 
 class TestSupportFiles:
     def test_invalid_support_files_detected_and_fixed(self, wiki_dir):
-        (wiki_dir / "log.md").write_text("# Wiki Log\n\nlegacy\n", encoding="utf-8")
+        invalid_base = next(iter(schema_mod.BASE_FILE_TEMPLATES))
+        (wiki_dir / invalid_base).write_text("filters:\n  and: []\n", encoding="utf-8")
         issues = lint_mod.run_lint(wiki_dir)
         support_issues = [issue for issue in issues if issue.category == "support-file"]
-        assert {issue.file for issue in support_issues} == {"log.md"}
+        assert {issue.file for issue in support_issues} == {invalid_base}
 
         fixes = lint_mod.apply_fixes(wiki_dir, issues, dry_run=False)
-        assert any(fix.file == "log.md" for fix in fixes)
-        assert (wiki_dir / "log.md").read_text(encoding="utf-8") == lint_mod.LOG_TEMPLATE
+        assert any(fix.file == invalid_base for fix in fixes)
+        assert (wiki_dir / invalid_base).read_text(encoding="utf-8") == schema_mod.BASE_FILE_TEMPLATES[invalid_base]
 
     def test_missing_base_support_file_detected_and_fixed(self, wiki_dir):
         missing_base = next(iter(schema_mod.BASE_FILE_TEMPLATES))
@@ -164,7 +164,7 @@ class TestSupportFiles:
             wiki_dir,
             "concepts",
             "shared-slug",
-            ['title: "Shared Slug"', "slug: shared-slug", "tags: [ml]"],
+            ['title: "Shared Slug"', "slug: shared-slug", "tags: [ml]", "maturity: working", "key_sources: []"],
         )
         issues = lint_mod.run_lint(wiki_dir)
         assert any(issue.category == "duplicate-slug" for issue in issues)
@@ -190,7 +190,7 @@ class TestSlugField:
             wiki_dir,
             "concepts",
             "flash-attention",
-            ['title: "Flash Attention"', "slug: flash-attention-v2", "tags: [attention]"],
+            ['title: "Flash Attention"', "slug: flash-attention-v2", "tags: [attention]", "maturity: working", "key_sources: []"],
         )
         issues = lint_mod.run_lint(wiki_dir)
         assert any(issue.category == "slug-field" for issue in issues)
@@ -207,7 +207,7 @@ class TestFieldValues:
             wiki_dir,
             "theorems",
             "bound",
-            ['title: "Bound"', "slug: bound", "theorem_kind: miracle", "tags: [ml]", 'relation_derived_from: ["[[paper-a]]"]'],
+            ['title: "Bound"', "slug: bound", "theorem_kind: miracle", "status: draft", "key_sources: [paper-a]", "tags: [ml]"],
         )
         issues = lint_mod.check_field_values(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert any("theorem_kind" in issue.message for issue in issues)
@@ -251,7 +251,7 @@ class TestCrossReferences:
         assert "[[flash-attention]]" in content
         assert fixes
 
-    def test_block_list_relation_sources_are_checked(self, wiki_dir):
+    def test_block_list_key_sources_are_checked(self, wiki_dir):
         _write_page(
             wiki_dir,
             "sources",
@@ -268,29 +268,11 @@ class TestCrossReferences:
                 "slug: flash-attention",
                 "tags: [attention]",
                 "relation_derived_from:",
-                '  - "[[paper-a]]"',
+                "  - paper-a",
             ],
         )
         issues = lint_mod.check_cross_references(wiki_dir, lint_mod.find_all_pages(wiki_dir))
         assert any("does not link back" in issue.message for issue in issues)
-
-    def test_relation_derived_from_non_source_does_not_require_source_backlink(self, wiki_dir):
-        _write_page(
-            wiki_dir,
-            "concepts",
-            "base-concept",
-            ['title: "Base Concept"', "slug: base-concept", "tags: [ml]"],
-            "## Relations\n",
-        )
-        _write_page(
-            wiki_dir,
-            "concepts",
-            "child-concept",
-            ['title: "Child Concept"', "slug: child-concept", "tags: [ml]", 'relation_derived_from: ["[[base-concept]]"]'],
-            "## Relations\n\n- Derived from [[base-concept]]: specializes it.\n",
-        )
-        issues = lint_mod.check_cross_references(wiki_dir, lint_mod.find_all_pages(wiki_dir))
-        assert not issues
 
 
 class TestRelationConsistency:
@@ -309,12 +291,14 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
+                "maturity: working",
+                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n",
         )
         issues = lint_mod.run_lint(wiki_dir)
-        assert any("lacks matching explanation" in issue.message for issue in issues)
+        assert any("lacks a matching Derived from explanation" in issue.message for issue in issues)
 
     def test_relation_body_requires_property(self, wiki_dir):
         _write_page(
@@ -327,11 +311,189 @@ class TestRelationConsistency:
             wiki_dir,
             "concepts",
             "concept-a",
-            ['title: "Concept A"', "slug: concept-a", "tags: [ml]"],
+            ['title: "Concept A"', "slug: concept-a", "tags: [ml]", "maturity: working", "key_sources: [paper-a]"],
             "## Relations\n\n- Derived from [[paper-a]]: uses its setup.\n",
         )
         issues = lint_mod.run_lint(wiki_dir)
         assert any("no relation_* property includes it" in issue.message for issue in issues)
+
+    def test_relation_label_mismatch_detected(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            [
+                'title: "Concept A"',
+                "slug: concept-a",
+                "tags: [ml]",
+                'relation_derived_from: ["[[paper-a]]"]',
+            ],
+            "## Relations\n\n- Uses: [[paper-a]] provides the source material.\n",
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any("labels [[paper-a]] as Uses" in issue.message for issue in issues)
+
+    def test_unknown_relation_label_detected(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            ['title: "Concept A"', "slug: concept-a", "tags: [ml]"],
+            "## Relations\n\n- Supports: [[paper-a]] carries a legacy label.\n",
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any("unknown relation label 'Supports'" in issue.message for issue in issues)
+
+
+class TestRelationRanges:
+    def test_deprecated_relation_supports_is_rejected(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            ['title: "Concept A"', "slug: concept-a", "tags: [ml]", 'relation_supports: ["[[concept-b]]"]'],
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-b",
+            ['title: "Concept B"', "slug: concept-b", "tags: [ml]"],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any(issue.category == "deprecated-relation" for issue in issues)
+
+    def test_relation_derived_from_requires_source_targets(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            ['title: "Concept A"', "slug: concept-a", "tags: [ml]", 'relation_derived_from: ["[[concept-b]]"]'],
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-b",
+            ['title: "Concept B"', "slug: concept-b", "tags: [ml]"],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any("allowed targets are: sources" in issue.message for issue in issues)
+
+    def test_relation_uses_rejects_source_targets(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+        )
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            ['title: "Concept A"', "slug: concept-a", "tags: [ml]", 'relation_uses: ["[[paper-a]]"]'],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any("Uses points to [[paper-a]] in wiki/sources" in issue.message for issue in issues)
+
+    def test_people_pages_keep_source_provenance_in_key_sources(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+        )
+        _write_page(
+            wiki_dir,
+            "people",
+            "john-doe",
+            ['title: "John Doe"', "slug: john-doe", "tags: [ml]", 'relation_derived_from: ["[[paper-a]]"]'],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any(issue.category == "relation-field" and "wiki/people" in issue.message for issue in issues)
+
+    def test_source_pages_do_not_use_relation_derived_from(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            [
+                'title: "Paper A"',
+                "slug: paper-a",
+                "source_kind: paper",
+                "source_path: raw/papers/paper-a.tex",
+                'relation_derived_from: ["[[paper-b]]"]',
+            ],
+        )
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-b",
+            ['title: "Paper B"', "slug: paper-b", "source_kind: paper", "source_path: raw/papers/paper-b.tex"],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any(issue.category == "relation-field" and "wiki/sources" in issue.message for issue in issues)
+
+    def test_foundation_pages_do_not_use_relation_derived_from_or_contradicts(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "sources",
+            "paper-a",
+            ['title: "Paper A"', "slug: paper-a", "source_kind: paper", "source_path: raw/papers/paper-a.tex"],
+        )
+        _write_page(
+            wiki_dir,
+            "foundations",
+            "foundation-a",
+            [
+                'title: "Foundation A"',
+                "slug: foundation-a",
+                "tags: [ml]",
+                'relation_derived_from: ["[[paper-a]]"]',
+                'relation_contradicts: ["[[foundation-b]]"]',
+            ],
+        )
+        _write_page(
+            wiki_dir,
+            "foundations",
+            "foundation-b",
+            ['title: "Foundation B"', "slug: foundation-b", "tags: [ml]"],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        relation_field_messages = [issue.message for issue in issues if issue.category == "relation-field"]
+        assert any("relation_derived_from is not allowed on wiki/foundations" == message for message in relation_field_messages)
+        assert any("relation_contradicts is not allowed on wiki/foundations" == message for message in relation_field_messages)
+
+    def test_output_pages_do_not_use_relation_extends(self, wiki_dir):
+        _write_page(
+            wiki_dir,
+            "concepts",
+            "concept-a",
+            ['title: "Concept A"', "slug: concept-a", "tags: [ml]"],
+        )
+        _write_page(
+            wiki_dir,
+            "outputs",
+            "output-a",
+            [
+                'title: "Output A"',
+                "slug: output-a",
+                "tags: [ml]",
+                'relation_extends: ["[[concept-a]]"]',
+            ],
+        )
+        issues = lint_mod.run_lint(wiki_dir)
+        assert any(issue.category == "relation-field" and "relation_extends is not allowed on wiki/outputs" == issue.message for issue in issues)
 
     def test_relation_property_body_pair_passes(self, wiki_dir):
         _write_page(
@@ -348,6 +510,8 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
+                "maturity: working",
+                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n- Derived from [[paper-a]]: uses its setup.\n",
@@ -370,6 +534,8 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
+                "maturity: working",
+                "key_sources: [paper-a]",
                 "relation_derived_from:",
                 '  - "[[paper-a]]"',
             ],
@@ -394,6 +560,8 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
+                "maturity: working",
+                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n- Derived from [[paper-a#Summary]]: cites the relevant section.\n",
@@ -416,12 +584,14 @@ class TestRelationConsistency:
                 'title: "Concept A"',
                 "slug: concept-a",
                 "tags: [ml]",
+                "maturity: working",
+                "key_sources: [paper-a]",
                 'relation_derived_from: ["[[paper-a]]"]',
             ],
             "## Relations\n\n```md\n- Derived from [[paper-a]]\n```\n",
         )
         issues = lint_mod.run_lint(wiki_dir)
-        assert any("lacks matching explanation" in issue.message for issue in issues)
+        assert any("lacks a matching Derived from explanation" in issue.message for issue in issues)
 
 
 class TestCliJson:

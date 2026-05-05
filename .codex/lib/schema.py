@@ -26,11 +26,10 @@ SYNTHESIS_PAGE_FOLDERS = [f"wiki/{name}" for name in ("ideas", "topics", "output
 
 # Frozen semantic relation schema.
 RELATION_SCHEMA_STATUS = "frozen"
-RELATION_SCHEMA_CHANGE_POLICY = "New relation fields require proof that the six existing fields cannot express the relation."
+RELATION_SCHEMA_CHANGE_POLICY = "New relation fields require proof that the five existing fields cannot express the relation."
 RELATION_FIELDS = [
     "relation_derived_from",
     "relation_extends",
-    "relation_supports",
     "relation_contradicts",
     "relation_uses",
     "relation_compares_with",
@@ -38,10 +37,27 @@ RELATION_FIELDS = [
 RELATION_DISPLAY_NAMES = {
     "relation_derived_from": "Derived from",
     "relation_extends": "Extends",
-    "relation_supports": "Supports",
     "relation_contradicts": "Contradicts",
     "relation_uses": "Uses",
     "relation_compares_with": "Compares with",
+}
+DEPRECATED_RELATION_FIELDS = ["relation_supports"]
+RELATION_FIELDS_BY_PAGE_TYPE = {
+    "sources": {"relation_extends", "relation_contradicts", "relation_uses", "relation_compares_with"},
+    "concepts": {"relation_derived_from", "relation_extends", "relation_uses", "relation_compares_with"},
+    "topics": {"relation_derived_from", "relation_extends", "relation_contradicts", "relation_uses", "relation_compares_with"},
+    "people": set(),
+    "ideas": {"relation_derived_from", "relation_extends", "relation_contradicts", "relation_uses", "relation_compares_with"},
+    "theorems": {"relation_derived_from", "relation_extends", "relation_contradicts", "relation_uses", "relation_compares_with"},
+    "foundations": {"relation_extends", "relation_uses", "relation_compares_with"},
+    "outputs": {"relation_derived_from", "relation_uses", "relation_compares_with"},
+}
+RELATION_ALLOWED_TARGET_TYPES = {
+    "relation_derived_from": {"sources"},
+    "relation_extends": {"concepts", "theorems", "foundations", "ideas", "topics"},
+    "relation_contradicts": {"concepts", "theorems", "foundations", "ideas", "topics", "outputs"},
+    "relation_uses": {"concepts", "theorems", "foundations", "ideas", "topics", "outputs"},
+    "relation_compares_with": {"concepts", "theorems", "foundations", "ideas", "topics", "outputs"},
 }
 
 REQUIRED_FIELDS = {
@@ -201,6 +217,10 @@ views:
       - year
       - source_path
       - tags
+      - relation_extends
+      - relation_contradicts
+      - relation_uses
+      - relation_compares_with
   - type: table
     name: Concepts and theorems
     filters:
@@ -212,7 +232,7 @@ views:
     order:
       - formula.display_title
       - theorem_kind
-{_relation_order_lines(fields=["relation_derived_from", "relation_extends", "relation_supports", "relation_uses", "relation_compares_with"])}
+{_relation_order_lines(fields=["relation_derived_from", "relation_extends", "relation_contradicts", "relation_uses", "relation_compares_with"])}
       - formula.relation_count
   - type: table
     name: Ideas and outputs
@@ -226,7 +246,7 @@ views:
       - formula.display_title
       - priority
       - tags
-{_relation_order_lines(fields=["relation_derived_from", "relation_supports", "relation_compares_with"])}
+{_relation_order_lines(fields=["relation_derived_from", "relation_extends", "relation_contradicts", "relation_uses", "relation_compares_with"])}
       - formula.relation_count
 """
 

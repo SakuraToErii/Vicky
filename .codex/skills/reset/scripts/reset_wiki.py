@@ -17,9 +17,9 @@ if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
 from schema import INDEXED_DIRS, RAW_DIRS, SUPPORT_DIRS
-from support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
+from support_files import SUPPORT_FILE_TEMPLATES, write_support_file
 
-ALL_SCOPES = ["wiki", "log", "checkpoints"]
+ALL_SCOPES = ["wiki", "checkpoints"]
 RAW_SCOPE = "raw"
 VALID_SCOPES = ALL_SCOPES + [RAW_SCOPE]
 SENTINEL_PATHS = ["AGENTS.md", ".obsidian/types.json", "wiki"]
@@ -76,21 +76,17 @@ def plan(project_root: Path, scopes: list[str]) -> dict:
         for entity in INDEXED_DIRS:
             for file_path in _list_md(wiki / entity):
                 data["delete_files"].append(str(file_path.relative_to(project_root)))
-        if (wiki / "log.md").exists():
-            data["delete_files"].append("wiki/log.md")
-        data["reset_files"].append("wiki/log.md")
+        for file_path in _list_md(wiki):
+            data["delete_files"].append(str(file_path.relative_to(project_root)))
         for support_dir in SUPPORT_DIRS:
             for file_path in _list_entries(wiki / support_dir):
                 data["delete_files"].append(str(file_path.relative_to(project_root)))
-        data["reset_files"].extend(f"wiki/{relative_path}" for relative_path in SUPPORT_FILE_TEMPLATES if relative_path != "log.md")
+        data["reset_files"].extend(f"wiki/{relative_path}" for relative_path in SUPPORT_FILE_TEMPLATES)
 
     if "raw" in scopes:
         for subdir in RAW_DIRS:
             for file_path in _list_entries(project_root / "raw" / subdir):
                 data["delete_files"].append(str(file_path.relative_to(project_root)))
-
-    if "log" in scopes and "wiki" not in scopes:
-        data["reset_files"].append("wiki/log.md")
 
     if "checkpoints" in scopes:
         data["actions"].append("clear wiki/.checkpoints/*.json")
@@ -175,11 +171,9 @@ def execute(project_root: Path, scopes: list[str]) -> dict:
             gitkeep = directory / ".gitkeep"
             if not gitkeep.exists():
                 gitkeep.touch()
-        for scaffold in ("log.md",):
-            scaffold_path = wiki / scaffold
-            if _delete_path(scaffold_path):
+        for file_path in _list_md(wiki):
+            if _delete_path(file_path):
                 deleted += 1
-        (wiki / "log.md").write_text(LOG_TEMPLATE, encoding="utf-8")
         for support_dir in SUPPORT_DIRS:
             directory = wiki / support_dir
             for entry in _list_entries(directory):
@@ -187,8 +181,6 @@ def execute(project_root: Path, scopes: list[str]) -> dict:
                     deleted += 1
             directory.mkdir(parents=True, exist_ok=True)
         for relative_path in SUPPORT_FILE_TEMPLATES:
-            if relative_path == "log.md":
-                continue
             write_support_file(wiki, relative_path, overwrite=True)
         reset += len(SUPPORT_FILE_TEMPLATES)
 
@@ -204,12 +196,6 @@ def execute(project_root: Path, scopes: list[str]) -> dict:
             gitkeep = directory / ".gitkeep"
             if not gitkeep.exists():
                 gitkeep.touch()
-
-    if "log" in scopes and "wiki" not in scopes:
-        if _delete_path(wiki / "log.md"):
-            deleted += 1
-        (wiki / "log.md").write_text(LOG_TEMPLATE, encoding="utf-8")
-        reset += 1
 
     if "checkpoints" in scopes:
         checkpoint_dir = wiki / ".checkpoints"

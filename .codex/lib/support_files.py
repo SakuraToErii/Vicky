@@ -6,12 +6,7 @@ from pathlib import Path
 
 from schema import BASE_FILE_TEMPLATES
 
-LOG_TEMPLATE = "# Vicky Log\n\n"
-
-SUPPORT_FILE_TEMPLATES = {
-    "log.md": LOG_TEMPLATE,
-    **BASE_FILE_TEMPLATES,
-}
+SUPPORT_FILE_TEMPLATES = dict(BASE_FILE_TEMPLATES)
 
 
 def write_support_file(wiki_dir: Path, relative_path: str, overwrite: bool = True) -> Path:

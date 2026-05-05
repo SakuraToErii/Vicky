@@ -7,7 +7,7 @@ This file is the always-loaded contract for Codex inside the Vicky vault. Keep i
 Vicky is a lightweight Obsidian-native LLM wiki.
 
 - `raw/` is user-owned input: papers, web clips, inbox notes, and scratch material.
-- `wiki/` is the maintained knowledge layer: sources, concepts, theorems, foundations, people, ideas, topics, outputs, Bases, and log.
+- `wiki/` is the maintained knowledge layer: sources, concepts, theorems, foundations, people, ideas, topics, outputs, and Bases.
 - `templates/` stores Obsidian templates for wiki page creation.
 - `.codex/skills/` stores formal workflows.
 - `.codex/lib/` stores shared repo-local schema and helper code.
@@ -73,28 +73,55 @@ Minimum completion path:
    - `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"`
 2. Create from the matching template and edit the exact target markdown file.
 3. Fill semantic follow-up:
-   - for source-backed concepts, theorems, and ideas, add the source page to `relation_derived_from`
+   - for source-backed concepts, theorems, ideas, topics, and outputs, add the source page to `relation_derived_from`
    - for source-backed people, maintain `key_sources`
    - add the necessary `relation_*` properties
    - mirror every stable semantic edge in `## Relations`
    - add the reverse source mention or related-page mention in body text or a related section.
-4. Append the `wiki/log.md` entry.
-5. Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json`.
+4. Run `./.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json`.
 
-A page is complete when the target page, reverse links, semantic properties, log entry, and lint result are all in place.
+A page is complete when the target page, reverse links, semantic properties, and lint result are all in place.
 
 ## Semantic Relations
 
-Use these six relation fields as the frozen semantic graph schema:
+Use these five relation fields as the frozen semantic graph schema:
 
 - `relation_derived_from`
 - `relation_extends`
-- `relation_supports`
 - `relation_contradicts`
 - `relation_uses`
 - `relation_compares_with`
 
-New relation fields require proof that these six fields cannot express the relation.
+New relation fields require proof that these five fields cannot express the relation.
+
+Direction rule:
+
+- Store only outgoing edges. The current page points to the pages it cites, extends, depends on, contradicts, or compares with.
+- Retrieve incoming neighbors by reverse lookup during search or Base queries.
+
+Meaning rules:
+
+- `relation_derived_from`: source provenance. Use this when the current page is written from one or more `wiki/sources/*` pages.
+- `relation_extends`: knowledge-line continuation. Use this when the current page develops, sharpens, generalizes, or specializes an existing internal page.
+- `relation_uses`: local dependency. Use this when the current page relies on an existing definition, theorem, method, tool, or conceptual component.
+
+Target range guidance:
+
+- `relation_derived_from` points to `wiki/sources/*`.
+- `relation_extends` usually points to `wiki/concepts/*`, `wiki/theorems/*`, `wiki/foundations/*`, `wiki/ideas/*`, or `wiki/topics/*`.
+- `relation_uses` usually points to `wiki/concepts/*`, `wiki/theorems/*`, `wiki/foundations/*`, `wiki/ideas/*`, `wiki/topics/*`, or `wiki/outputs/*`.
+- on `wiki/sources/*`, `relation_extends`, `relation_uses`, `relation_compares_with`, and `relation_contradicts` may also point to other `wiki/sources/*` pages
+
+Page-type matrix:
+
+- sources: `relation_extends`, `relation_contradicts`, `relation_uses`, `relation_compares_with`
+- concepts: `relation_derived_from`, `relation_extends`, `relation_uses`, `relation_compares_with`
+- theorems: `relation_derived_from`, `relation_extends`, `relation_contradicts`, `relation_uses`, `relation_compares_with`
+- foundations: `relation_extends`, `relation_uses`, `relation_compares_with`
+- ideas: `relation_derived_from`, `relation_extends`, `relation_contradicts`, `relation_uses`, `relation_compares_with`
+- topics: `relation_derived_from`, `relation_extends`, `relation_contradicts`, `relation_uses`, `relation_compares_with`
+- outputs: `relation_derived_from`, `relation_uses`, `relation_compares_with`
+- people: keep source provenance in `key_sources`
 
 Use Obsidian wikilink strings as values:
 
@@ -103,13 +130,28 @@ relation_derived_from:
   - "[[source-paper-a]]"
 relation_extends:
   - "[[concept-b]]"
+relation_uses:
+  - "[[theorem-c]]"
+```
+
+Example:
+
+```yaml
+# wiki/concepts/discounted-occupancy-measure.md
+relation_derived_from:
+  - "[[trust-region-policy-optimization]]"
+relation_extends:
+  - "[[occupancy-measure]]"
+relation_uses:
+  - "[[markov-decision-process]]"
+  - "[[discount-factor]]"
 ```
 
 Properties are the graph index. `## Relations` is the evidence context.
 
 ## Tool Boundaries
 
-Use Obsidian CLI for vault reads, note creation, property edits, search, link checks, log appends, renames, and moves.
+Use Obsidian CLI for vault reads, note creation, property edits, search, link checks, renames, and moves.
 
 Use Python helpers by `.venv/bin/python` for deterministic operations: lint, frontmatter lookup, slugging, duplicate checks, Semantic Scholar metadata, reset planning, setup, and tests.
 

@@ -20,16 +20,19 @@ Apply a targeted edit under `wiki/`.
 
 1. Resolve every target to a unique wiki slug or exact `wiki/<type>/<slug>.md` path. Edit only files under `wiki/`.
 2. Read existing wiki pages directly from the filesystem.
-3. Apply scoped frontmatter and body edits directly to the exact markdown file, then verify with `git diff -- <exact-target-path>`.
-4. Use Obsidian CLI for vault operations that should preserve Obsidian behavior: append/prepend, move, rename, delete, and property commands when needed.
-5. Append a `wiki/log.md` line for substantive changes, then run `.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json`.
+3. For concept, theorem, or idea pages created or heavily reshaped during the edit, run the matching duplicate check first, including `./.venv/bin/python .codex/skills/ingest/scripts/similar_pages.py wiki idea "<title>"` when the target is an idea.
+4. Apply scoped frontmatter and body edits directly to the exact markdown file, then verify with `git diff -- <exact-target-path>`.
+5. finish one page at a time through the full post-processing path.
+6. For people pages, add `key_sources`.
+7. Use Obsidian CLI for vault operations that should preserve Obsidian behavior: append/prepend, move, rename, delete, and property commands when needed.
+8. Run `.venv/bin/python .codex/skills/check/scripts/lint.py --wiki-dir wiki --json` after substantive changes.
 
 ## Obsidian CLI Usage
 
 Run commands from the vault root.
 
 - Use `file=<slug>` for existing wiki notes in a lint-clean vault. Use `path=wiki/<type>/<slug>.md` for ambiguous slugs or exact-path fallback.
-- Append to an existing note or log: `obsidian append file=<slug> content="<text>"` or `obsidian append file=log content="## [YYYY-MM-DD] edit | ..."`.
+- Append to an existing note: `obsidian append file=<slug> content="<text>"`.
 - Prepend after frontmatter for tiny additions: `obsidian prepend file=<slug> content="<text>"`.
 - Move a note with an exact destination path: `obsidian move file=<slug> to="wiki/foundations/<slug>.md"`.
 - Rename a note in place: `obsidian rename file=<slug> name="<new-slug>"`.

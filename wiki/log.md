@@ -1,1 +1,0 @@
-# Vicky Log

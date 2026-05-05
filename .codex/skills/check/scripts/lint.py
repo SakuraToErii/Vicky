@@ -18,9 +18,22 @@ if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
 from frontmatter import FRONTMATTER_RE, parse_frontmatter, parse_scalar as _parse_scalar, serialize_frontmatter as _serialize_frontmatter
-from markdown import WIKILINK_RE, find_wikilinks
-from schema import FIELD_DEFAULTS, INDEXED_DIRS, RELATION_FIELDS, REQUIRED_FIELDS, VALID_VALUES
-from support_files import LOG_TEMPLATE, SUPPORT_FILE_TEMPLATES, write_support_file
+from markdown import WIKILINK_RE, find_wikilinks, sanitize_markdown_links
+from schema import (
+    DEPRECATED_RELATION_FIELDS,
+    FIELD_DEFAULTS,
+    INDEXED_DIRS,
+    RELATION_ALLOWED_TARGET_TYPES,
+    RELATION_DISPLAY_NAMES,
+    RELATION_FIELDS_BY_PAGE_TYPE,
+    RELATION_FIELDS,
+    REQUIRED_FIELDS,
+    VALID_VALUES,
+)
+from support_files import SUPPORT_FILE_TEMPLATES, write_support_file
+
+RELATION_LABEL_TO_FIELD = {label.lower(): field for field, label in RELATION_DISPLAY_NAMES.items()}
+SOURCE_RELATION_FIELDS = {"relation_extends", "relation_contradicts", "relation_uses", "relation_compares_with"}
 
 
 class LintIssue:
@@ -94,22 +107,12 @@ def check_duplicate_slugs(wiki_dir: Path, duplicates: dict[str, list[Path]]) -> 
 
 def check_support_files(wiki_dir: Path) -> list[LintIssue]:
     issues: list[LintIssue] = []
-    support_specs = {
-        "log.md": {
-            "template": LOG_TEMPLATE,
-            "validators": [lambda content: content.startswith("# Vicky Log\n")],
-            "message": "Support file does not match the current wiki log template",
-        },
-    }
     for filename, template in SUPPORT_FILE_TEMPLATES.items():
-        if filename == "log.md":
-            continue
-        support_specs[filename] = {
+        support_specs = {
             "template": template,
             "validators": [lambda content, expected=template: _contains_canonical_template(content, expected)],
-            "message": "Support base does not match the current base template",
+            "message": "Support file does not match the current template",
         }
-    for filename, spec in support_specs.items():
         path = wiki_dir / filename
         if not path.exists():
             issues.append(
@@ -124,14 +127,14 @@ def check_support_files(wiki_dir: Path) -> list[LintIssue]:
             )
             continue
         content = path.read_text(encoding="utf-8")
-        if all(check(content) for check in spec["validators"]):
+        if all(check(content) for check in support_specs["validators"]):
             continue
         issues.append(
             LintIssue(
                 "🔴",
                 "support-file",
                 filename,
-                spec["message"],
+                support_specs["message"],
                 fixable=True,
                 suggestion=f"Rewrite {filename} from the canonical template",
             )
@@ -285,7 +288,7 @@ def _normalize_link_target(value) -> str:
 
 
 def _is_support_link(target: str) -> bool:
-    return target.endswith(".base")
+    return target.endswith(".base") or target.startswith("raw/")
 
 
 def _section_body(content: str, heading: str) -> str:
@@ -299,6 +302,74 @@ def _section_body(content: str, heading: str) -> str:
     return content[start : start + next_heading.start()]
 
 
+def check_deprecated_relation_fields(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIssue]:
+    issues: list[LintIssue] = []
+    for file_path in pages.values():
+        frontmatter = extract_frontmatter(file_path.read_text(encoding="utf-8"))
+        rel_path = str(file_path.relative_to(wiki_dir))
+        for field in DEPRECATED_RELATION_FIELDS:
+            if field not in frontmatter:
+                continue
+            issues.append(
+                LintIssue(
+                    "🔴",
+                    "deprecated-relation",
+                    rel_path,
+                    f"{field} is deprecated",
+                    suggestion=f"Remove {field} and rewrite the edge with the remaining relation fields",
+                )
+            )
+    return issues
+
+
+def check_relation_target_ranges(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIssue]:
+    issues: list[LintIssue] = []
+    for file_path in pages.values():
+        page_type = file_path.parent.name
+        frontmatter = extract_frontmatter(file_path.read_text(encoding="utf-8"))
+        rel_path = str(file_path.relative_to(wiki_dir))
+        allowed_fields = RELATION_FIELDS_BY_PAGE_TYPE.get(page_type, set())
+        for field in RELATION_FIELDS:
+            if field in frontmatter and field not in allowed_fields:
+                suggestion = f"Remove {field} from wiki/{page_type} pages"
+                if page_type == "people":
+                    suggestion = "Remove relation_* fields from people pages and keep source provenance in key_sources"
+                issues.append(
+                    LintIssue(
+                        "🔴",
+                        "relation-field",
+                        rel_path,
+                        f"{field} is not allowed on wiki/{page_type}",
+                        suggestion=suggestion,
+                    )
+                )
+                continue
+            for raw_value in _as_list(frontmatter.get(field)):
+                target = _normalize_link_target(raw_value)
+                if not target or target not in pages:
+                    continue
+                allowed_types = set(RELATION_ALLOWED_TARGET_TYPES.get(field, set()))
+                if page_type == "sources" and field in SOURCE_RELATION_FIELDS:
+                    allowed_types.add("sources")
+                if not allowed_types:
+                    continue
+                target_type = pages[target].parent.name
+                if target_type in allowed_types:
+                    continue
+                label = RELATION_DISPLAY_NAMES[field]
+                allowed_rendered = ", ".join(sorted(allowed_types))
+                issues.append(
+                    LintIssue(
+                        "🔴",
+                        "relation-range",
+                        rel_path,
+                        f"{label} points to [[{target}]] in wiki/{target_type}, allowed targets are: {allowed_rendered}",
+                        suggestion=f"Move [[{target}]] to a matching relation field or change the target page type",
+                    )
+                )
+    return issues
+
+
 def check_relation_consistency(wiki_dir: Path, pages: dict[str, Path]) -> list[LintIssue]:
     issues: list[LintIssue] = []
     for slug, file_path in pages.items():
@@ -306,19 +377,53 @@ def check_relation_consistency(wiki_dir: Path, pages: dict[str, Path]) -> list[L
         frontmatter = extract_frontmatter(content)
         rel_path = str(file_path.relative_to(wiki_dir))
         relations_body = _section_body(content, "## Relations")
-        body_targets = {
-            normalized
-            for target in find_wikilinks(relations_body)
-            if (normalized := _normalize_link_target(target))
-        }
-        property_targets: set[str] = set()
+        sanitized_relations_body = sanitize_markdown_links(relations_body)
+        body_targets_by_field: dict[str, set[str]] = {field: set() for field in RELATION_FIELDS}
+        property_targets_by_field: dict[str, set[str]] = {field: set() for field in RELATION_FIELDS}
+
+        for line in sanitized_relations_body.splitlines():
+            stripped = line.strip()
+            if not stripped.startswith("- "):
+                continue
+            line_targets = {
+                normalized
+                for target in find_wikilinks(stripped)
+                if (normalized := _normalize_link_target(target))
+            }
+            if not line_targets:
+                continue
+            lowered = stripped.lower()
+            field = None
+            label_text = ""
+            for relation_label, relation_field in RELATION_LABEL_TO_FIELD.items():
+                if lowered.startswith(f"- {relation_label} ") or lowered.startswith(f"- {relation_label}:"):
+                    field = relation_field
+                    label_text = RELATION_DISPLAY_NAMES[relation_field]
+                    break
+            if field is None:
+                label_match = re.match(r"^-\s*([^:\[]+?)(?:\s+\[\[|:)", stripped)
+                label_text = label_match.group(1).strip() if label_match else stripped[2:].strip()
+                internal_targets = sorted(target for target in line_targets if target in pages)
+                if internal_targets:
+                    rendered = ", ".join(f"[[{target}]]" for target in internal_targets)
+                    issues.append(
+                        LintIssue(
+                            "🟡",
+                            "relation",
+                            rel_path,
+                            f"## Relations uses unknown relation label '{label_text}' for {rendered}",
+                            suggestion="Use one of: Derived from, Extends, Contradicts, Uses, Compares with",
+                        )
+                    )
+                continue
+            body_targets_by_field[field].update(target for target in line_targets if target in pages)
 
         for field in RELATION_FIELDS:
             for raw_value in _as_list(frontmatter.get(field)):
                 target = _normalize_link_target(raw_value)
                 if not target:
                     continue
-                property_targets.add(target)
+                property_targets_by_field[field].add(target)
                 if target not in pages:
                     issues.append(
                         LintIssue(
@@ -330,29 +435,43 @@ def check_relation_consistency(wiki_dir: Path, pages: dict[str, Path]) -> list[L
                         )
                     )
                     continue
-                if target not in body_targets:
+                if target not in body_targets_by_field[field]:
                     issues.append(
                         LintIssue(
                             "🟡",
                             "relation",
                             rel_path,
-                            f"{field} includes [[{target}]] but ## Relations lacks matching explanation",
-                            suggestion=f"Add a ## Relations bullet explaining [[{target}]]",
+                            f"{field} includes [[{target}]] but ## Relations lacks a matching {RELATION_DISPLAY_NAMES[field]} explanation",
+                            suggestion=f"Add a ## Relations bullet starting with '{RELATION_DISPLAY_NAMES[field]}:' for [[{target}]]",
                         )
                     )
 
-        for target in body_targets - property_targets:
-            if target not in pages:
-                continue
-            issues.append(
-                LintIssue(
-                    "🟡",
-                    "relation",
-                    rel_path,
-                    f"## Relations mentions [[{target}]] but no relation_* property includes it",
-                    suggestion=f"Add [[{target}]] to the matching relation_* field",
+        for field, body_targets in body_targets_by_field.items():
+            for target in body_targets:
+                if target in property_targets_by_field[field]:
+                    continue
+                matching_fields = [name for name, targets in property_targets_by_field.items() if target in targets]
+                if matching_fields:
+                    rendered = ", ".join(matching_fields)
+                    issues.append(
+                        LintIssue(
+                            "🟡",
+                            "relation",
+                            rel_path,
+                            f"## Relations labels [[{target}]] as {RELATION_DISPLAY_NAMES[field]} but the property stores it under {rendered}",
+                            suggestion=f"Move [[{target}]] to {field} or change the ## Relations label",
+                        )
+                    )
+                    continue
+                issues.append(
+                    LintIssue(
+                        "🟡",
+                        "relation",
+                        rel_path,
+                        f"## Relations labels [[{target}]] as {RELATION_DISPLAY_NAMES[field]} but no relation_* property includes it",
+                        suggestion=f"Add [[{target}]] to {field}",
+                    )
                 )
-            )
     return issues
 
 
@@ -363,7 +482,7 @@ def check_cross_references(wiki_dir: Path, pages: dict[str, Path]) -> list[LintI
         content = file_path.read_text(encoding="utf-8")
         frontmatter = extract_frontmatter(content)
         rel_path = str(file_path.relative_to(wiki_dir))
-        if page_type not in {"concepts", "theorems", "people"}:
+        if page_type == "sources":
             continue
 
         field_name = "key_sources" if page_type == "people" else "relation_derived_from"
@@ -384,7 +503,7 @@ def check_cross_references(wiki_dir: Path, pages: dict[str, Path]) -> list[LintI
                         rel_path,
                         f"{field_name} has {source_slug} but sources/{source_slug}.md does not link back to [[{slug}]]",
                         fixable=True,
-                        suggestion=f"Add [[{slug}]] to sources/{source_slug}.md ## Related",
+                        suggestion=f"Add [[{slug}]] to sources/{source_slug}.md body text or ## Notes",
                     )
                 )
     return issues
@@ -446,8 +565,8 @@ def _fix_xref(wiki_dir: Path, issue: LintIssue) -> FixResult | None:
         return None
     source_slug, target_slug = match.groups()
     source_path = wiki_dir / "sources" / f"{source_slug}.md"
-    _append_to_section(source_path, "## Related", f"- [[{target_slug}]]")
-    return FixResult(f"sources/{source_slug}.md", f"Add [[{target_slug}]] to ## Related")
+    _append_to_section(source_path, "## Notes", f"- [[{target_slug}]]")
+    return FixResult(f"sources/{source_slug}.md", f"Add [[{target_slug}]] to ## Notes")
 
 
 def _fix_support_file(wiki_dir: Path, issue: LintIssue) -> FixResult | None:
@@ -510,6 +629,8 @@ def run_lint(wiki_dir: Path) -> list[LintIssue]:
     issues.extend(broken)
     issues.extend(check_orphan_pages(wiki_dir, pages, incoming))
     issues.extend(check_field_values(wiki_dir, pages))
+    issues.extend(check_deprecated_relation_fields(wiki_dir, pages))
+    issues.extend(check_relation_target_ranges(wiki_dir, pages))
     issues.extend(check_relation_consistency(wiki_dir, pages))
     issues.extend(check_cross_references(wiki_dir, pages))
     return issues

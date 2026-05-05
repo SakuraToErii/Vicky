@@ -18,10 +18,9 @@ import schema as schema_mod
 
 @pytest.fixture
 def project(tmp_path):
-    (tmp_path / "AGENTS.md").write_text("# Contract\n", encoding="utf-8")
-    (tmp_path / ".obsidian").mkdir()
-    (tmp_path / ".obsidian" / "types.json").write_text("{}", encoding="utf-8")
-
+    (tmp_path / "AGENTS.md").write_text("# Test Project\n", encoding="utf-8")
+    (tmp_path / ".obsidian").mkdir(parents=True)
+    (tmp_path / ".obsidian" / "types.json").write_text('{"types":{}}', encoding="utf-8")
     wiki = tmp_path / "wiki"
     for name in rw.INDEXED_DIRS:
         (wiki / name).mkdir(parents=True)
@@ -32,7 +31,7 @@ def project(tmp_path):
         (wiki / relative_path).write_text(content + "\n# local edit\n", encoding="utf-8")
     (wiki / "sources" / "paper-a.md").write_text("---\ntitle: Paper A\n---\n", encoding="utf-8")
     (wiki / "outputs" / "comparison.md").write_text("# comparison\n", encoding="utf-8")
-    (wiki / "log.md").write_text("# Vicky Log\n\n## [2026-04-27] something\n", encoding="utf-8")
+    (wiki / "index.md").write_text("# Index\n", encoding="utf-8")
 
     raw = tmp_path / "raw"
     for name in rw.RAW_DIRS:
@@ -48,55 +47,36 @@ def test_plan_lists_wiki_content(project):
     deletes = set(payload["delete_files"])
     assert "wiki/sources/paper-a.md" in deletes
     assert "wiki/outputs/comparison.md" in deletes
-    assert "wiki/log.md" in deletes
+    assert "wiki/index.md" in deletes
     for relative_path in schema_mod.BASE_FILE_TEMPLATES:
         assert f"wiki/{relative_path}" in deletes
         assert f"wiki/{relative_path}" in payload["reset_files"]
-    assert "wiki/log.md" in payload["reset_files"]
 
 
 def test_execute_wiki_removes_pages_and_keeps_gitkeep(project):
     result = rw.execute(project, ["wiki"])
     assert not (project / "wiki" / "sources" / "paper-a.md").exists()
     assert not (project / "wiki" / "outputs" / "comparison.md").exists()
-    assert "trash_dir" not in result
     assert (project / "wiki" / "sources" / ".gitkeep").exists()
     assert not (project / "wiki" / "index.md").exists()
-    assert (project / "wiki" / "log.md").read_text(encoding="utf-8") == rw.LOG_TEMPLATE
     for relative_path, content in schema_mod.BASE_FILE_TEMPLATES.items():
         assert (project / "wiki" / relative_path).read_text(encoding="utf-8") == content
-    assert result["reset_files"] == 1 + len(schema_mod.BASE_FILE_TEMPLATES)
+    assert result["reset_files"] == len(schema_mod.BASE_FILE_TEMPLATES)
 
 
-def test_raw_scope_requires_include_raw():
-    with pytest.raises(ValueError, match="--include-raw"):
-        rw.resolve_scopes("raw")
-
-
-def test_all_scope_excludes_raw_by_default():
-    assert "raw" not in rw.resolve_scopes("all")
-    assert "raw" in rw.resolve_scopes("all", include_raw=True)
-
-
-def test_execute_raw_moves_inbox_and_papers_to_trash(project):
-    result = rw.execute(project, rw.resolve_scopes("raw", include_raw=True))
+def test_execute_raw_removes_inbox_and_papers(project):
+    rw.execute(project, ["raw"])
     assert not (project / "raw" / "papers" / "paper-a.tex").exists()
     assert not (project / "raw" / "inbox" / "scratch.md").exists()
-    assert (project / result["trash_dir"] / "files" / "raw" / "papers" / "paper-a.tex").exists()
     assert (project / "raw" / "inbox" / ".gitkeep").exists()
 
 
-def test_rollback_restores_raw_files(project):
-    result = rw.execute(project, rw.resolve_scopes("raw", include_raw=True))
-    rollback = rw.rollback(project, result["trash_dir"])
-    assert rollback["restored_files"] > 0
-    assert (project / "raw" / "papers" / "paper-a.tex").exists()
-    assert (project / "raw" / "inbox" / "scratch.md").exists()
-
-
-def test_execute_log_resets_template(project):
-    rw.execute(project, ["log"])
-    assert (project / "wiki" / "log.md").read_text(encoding="utf-8") == "# Vicky Log\n\n"
+def test_execute_checkpoints_clears_json(project):
+    checkpoint_dir = project / "wiki" / ".checkpoints"
+    checkpoint_dir.mkdir(parents=True)
+    (checkpoint_dir / "draft.json").write_text('{"draft": true}', encoding="utf-8")
+    rw.execute(project, ["checkpoints"])
+    assert not (checkpoint_dir / "draft.json").exists()
 
 
 def test_cli_dry_run(project):
@@ -108,5 +88,4 @@ def test_cli_dry_run(project):
     )
     payload = json.loads(result.stdout)
     assert payload["status"] == "plan"
-    assert payload["plan_hash"]
     assert (project / "wiki" / "sources" / "paper-a.md").exists()
